@@ -1087,6 +1087,33 @@ def main() -> None:
                     0x4D, 0x53, 0x63, 0x65, 0x71,
                 ), hex(difficulty_id)
 
+            connection.sendall(compressed_frame(0x1D, threshold, b"\x01"))
+            while True:
+                lock_response = read_compressed_packet(connection, threshold)
+                lock_id, offset = read_varint(lock_response, 0)
+                if lock_id == 0x0A:
+                    server_difficulty, offset = read_varint(lock_response, offset)
+                    locked = lock_response[offset]
+                    offset += 1
+                    assert (server_difficulty, locked, offset) == (
+                        3 if hardcore else 2, int(hardcore), len(lock_response)
+                    )
+                    break
+                if lock_id == 0x2C:
+                    keep_alive_id = struct.unpack(">q", lock_response[offset:offset + 8])[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                    continue
+                if lock_id == 0x01:
+                    entity_id, _ = read_varint(lock_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                    continue
+                assert lock_id in (
+                    0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                    0x4D, 0x53, 0x63, 0x65, 0x71,
+                ), hex(lock_id)
+
             connection.sendall(compressed_frame(0x05, threshold, encode_varint(3)))
             corrected_mode_seen = False
             corrected_abilities_seen = False

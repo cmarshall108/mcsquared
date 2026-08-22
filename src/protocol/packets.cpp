@@ -2096,6 +2096,16 @@ void decode_empty_chat_ack(Reader& packet) {
     expect_packet_end(packet);
 }
 
+bool decode_lock_difficulty(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::lock_difficulty)) {
+        throw DecodeError("expected difficulty lock packet");
+    }
+    const auto locked = packet.read_bool();
+    expect_packet_end(packet);
+    return locked;
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");

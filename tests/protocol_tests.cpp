@@ -1037,6 +1037,21 @@ void test_play_streaming_packets() {
     } catch (const mc::protocol::DecodeError&) {
     }
 
+    Bytes lock_difficulty{0x1D, 0x01};
+    Reader lock_difficulty_reader(lock_difficulty);
+    assert(mc::protocol::play::decode_lock_difficulty(lock_difficulty_reader));
+    Bytes unlock_difficulty{0x1D, 0x00};
+    Reader unlock_difficulty_reader(unlock_difficulty);
+    assert(!mc::protocol::play::decode_lock_difficulty(unlock_difficulty_reader));
+    try {
+        Bytes trailing_lock_difficulty{0x1D, 0x01, 0x00};
+        Reader trailing_lock_difficulty_reader(trailing_lock_difficulty);
+        static_cast<void>(mc::protocol::play::decode_lock_difficulty(
+            trailing_lock_difficulty_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

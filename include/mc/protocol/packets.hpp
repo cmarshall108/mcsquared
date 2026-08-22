@@ -272,6 +272,7 @@ enum class ServerboundPacketId : std::int32_t {
 	keep_alive = 0x1C,
 	interact = 0x1A,
 	entity_tag_query = 0x19,
+	lock_difficulty = 0x1D,
 	move_player_pos = 0x1E,
 	move_player_pos_rot = 0x1F,
 	move_player_rot = 0x20,
@@ -690,6 +691,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] std::uint8_t decode_change_difficulty(Reader& packet);
 [[nodiscard]] std::uint8_t decode_change_game_mode(Reader& packet);
 void decode_empty_chat_ack(Reader& packet);
+[[nodiscard]] bool decode_lock_difficulty(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
 [[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);

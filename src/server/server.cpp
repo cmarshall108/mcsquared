@@ -3184,6 +3184,15 @@ private:
                         static_cast<std::uint8_t>(difficulty), config_.hardcore),
                     compression_threshold, cipher ? &*cipher : nullptr);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::lock_difficulty)) {
+                protocol::Reader lock_reader(packet);
+                static_cast<void>(protocol::play::decode_lock_difficulty(lock_reader));
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_change_difficulty(
+                        static_cast<std::uint8_t>(difficulty), config_.hardcore),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::change_game_mode)) {
                 protocol::Reader game_mode_reader(packet);
                 static_cast<void>(
