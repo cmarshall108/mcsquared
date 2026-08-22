@@ -3126,6 +3126,10 @@ private:
                 static_cast<void>(
                     protocol::play::decode_client_information(information_reader));
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::custom_payload)) {
+                protocol::Reader payload_reader(packet);
+                static_cast<void>(protocol::play::decode_custom_payload(payload_reader));
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::command_suggestion)) {
                 protocol::Reader suggestion_reader(packet);
                 const auto request =

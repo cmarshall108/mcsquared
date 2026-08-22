@@ -268,6 +268,7 @@ enum class ServerboundPacketId : std::int32_t {
 	container_close = 0x13,
 	container_slot_state_changed = 0x14,
 	cookie_response = 0x15,
+	custom_payload = 0x16,
 	keep_alive = 0x1C,
 	interact = 0x1A,
 	entity_tag_query = 0x19,
@@ -707,6 +708,7 @@ void decode_empty_chat_ack(Reader& packet);
 [[nodiscard]] std::pair<bool, bool> decode_player_status(Reader& packet);
 void decode_client_tick_end(Reader& packet);
 [[nodiscard]] configuration::ClientInformation decode_client_information(Reader& packet);
+[[nodiscard]] configuration::CustomPayload decode_custom_payload(Reader& packet);
 void decode_configuration_acknowledged(Reader& packet);
 [[nodiscard]] CookieResponse decode_cookie_response(Reader& packet);
 void decode_player_loaded(Reader& packet);

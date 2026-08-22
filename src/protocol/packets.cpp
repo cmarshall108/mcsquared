@@ -257,19 +257,23 @@ CookieResponse decode_cookie_response(Reader& packet) {
         packet, static_cast<std::int32_t>(ServerboundPacketId::cookie_response));
 }
 
+CustomPayload decode_custom_payload_payload(Reader& packet) {
+    CustomPayload payload{packet.read_identifier(), {}};
+    constexpr std::size_t max_custom_payload = 1U * 1024U * 1024U;
+    if (packet.remaining() > max_custom_payload) {
+        throw DecodeError("custom payload exceeds limit");
+    }
+    const auto data = packet.read_bytes(packet.remaining());
+    payload.data.assign(data.begin(), data.end());
+    return payload;
+}
+
 CustomPayload decode_custom_payload(Reader& packet) {
     if (packet.read_varint() !=
         static_cast<std::int32_t>(ServerboundPacketId::custom_payload)) {
         throw DecodeError("expected Configuration custom payload packet");
     }
-    CustomPayload payload{packet.read_identifier(), {}};
-    constexpr std::size_t max_custom_payload = 1U * 1024U * 1024U;
-    if (packet.remaining() > max_custom_payload) {
-        throw DecodeError("Configuration custom payload exceeds limit");
-    }
-    const auto data = packet.read_bytes(packet.remaining());
-    payload.data.assign(data.begin(), data.end());
-    return payload;
+    return decode_custom_payload_payload(packet);
 }
 
 Bytes encode_finish() {
@@ -1055,6 +1059,14 @@ configuration::ClientInformation decode_client_information(Reader& packet) {
         throw DecodeError("expected Play client information packet");
     }
     return configuration::decode_client_information_payload(packet);
+}
+
+configuration::CustomPayload decode_custom_payload(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::custom_payload)) {
+        throw DecodeError("expected Play custom payload packet");
+    }
+    return configuration::decode_custom_payload_payload(packet);
 }
 
 void decode_configuration_acknowledged(Reader& packet) {

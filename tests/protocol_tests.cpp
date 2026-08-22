@@ -1690,6 +1690,14 @@ void test_configuration_packets() {
     assert(custom_payload.channel == "mcsquared:test");
     assert(custom_payload.data == Bytes({7, 8, 9}));
 
+    auto play_custom_payload_bytes = custom_payload_bytes;
+    play_custom_payload_bytes.front() = 0x16;
+    Reader play_custom_payload_reader(play_custom_payload_bytes);
+    const auto play_custom_payload =
+        mc::protocol::play::decode_custom_payload(play_custom_payload_reader);
+    assert(play_custom_payload.channel == "mcsquared:test");
+    assert(play_custom_payload.data == Bytes({7, 8, 9}));
+
     Bytes resource_response_bytes{0x06};
     mc::protocol::write_uuid(resource_response_bytes, resource_pack_id);
     mc::protocol::write_varint(resource_response_bytes, 3);
