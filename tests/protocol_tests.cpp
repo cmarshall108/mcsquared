@@ -248,6 +248,23 @@ void test_play_streaming_packets() {
     Bytes spectator_target{0x3E, 0x08};
     Reader spectator_target_reader(spectator_target);
     assert(mc::protocol::play::decode_spectator_action(spectator_target_reader) == 7);
+    mc::protocol::Uuid teleport_target_uuid{};
+    teleport_target_uuid[0] = 0x12;
+    teleport_target_uuid[15] = 0x34;
+    Bytes teleport_to_entity{0x40};
+    mc::protocol::write_uuid(teleport_to_entity, teleport_target_uuid);
+    Reader teleport_to_entity_reader(teleport_to_entity);
+    assert(mc::protocol::play::decode_teleport_to_entity(teleport_to_entity_reader) ==
+           teleport_target_uuid);
+    try {
+        auto trailing_teleport = teleport_to_entity;
+        trailing_teleport.push_back(0);
+        Reader trailing_teleport_reader(trailing_teleport);
+        static_cast<void>(
+            mc::protocol::play::decode_teleport_to_entity(trailing_teleport_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
 
     const auto packet_body = [](const Bytes& framed) {
         Reader frame(framed);

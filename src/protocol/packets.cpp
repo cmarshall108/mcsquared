@@ -1485,6 +1485,16 @@ std::optional<std::int32_t> decode_spectator_action(Reader& packet) {
     return encoded - 1;
 }
 
+Uuid decode_teleport_to_entity(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::teleport_to_entity)) {
+        throw DecodeError("expected teleport-to-entity packet");
+    }
+    const auto uuid = packet.read_uuid();
+    expect_packet_end(packet);
+    return uuid;
+}
+
 std::uint8_t decode_swing(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::swing)) {
         throw DecodeError("expected Play swing packet");

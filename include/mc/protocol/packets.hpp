@@ -300,6 +300,7 @@ enum class ServerboundPacketId : std::int32_t {
 	set_creative_mode_slot = 0x38,
 	spectator_action = 0x3E,
 	swing = 0x3F,
+	teleport_to_entity = 0x40,
 	use_item_on = 0x42,
 	use_item = 0x43,
 	custom_click_action = 0x44,
@@ -760,6 +761,7 @@ void decode_player_loaded(Reader& packet);
 [[nodiscard]] std::int16_t decode_set_carried_item(Reader& packet);
 [[nodiscard]] CreativeSlotChange decode_set_creative_mode_slot(Reader& packet);
 [[nodiscard]] std::optional<std::int32_t> decode_spectator_action(Reader& packet);
+[[nodiscard]] Uuid decode_teleport_to_entity(Reader& packet);
 [[nodiscard]] std::uint8_t decode_swing(Reader& packet);
 [[nodiscard]] UseItemOn decode_use_item_on(Reader& packet);
 [[nodiscard]] UseItem decode_use_item(Reader& packet);

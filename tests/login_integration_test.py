@@ -1151,6 +1151,9 @@ def main() -> None:
                         0x4D, 0x53, 0x63, 0x65, 0x71,
                     ), hex(mode_id)
 
+            connection.sendall(
+                compressed_frame(0x40, threshold, uuid.UUID(int=(1 << 128) - 1).bytes)
+            )
             connection.sendall(compressed_frame(0x3E, threshold, encode_varint(3)))
             while True:
                 camera_response = read_compressed_packet(connection, threshold)

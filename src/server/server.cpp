@@ -3615,6 +3615,46 @@ private:
                     descriptor, protocol::play::encode_set_camera(camera_id),
                     compression_threshold, cipher ? &*cipher : nullptr);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::teleport_to_entity)) {
+                protocol::Reader teleport_reader(packet);
+                const auto target_uuid =
+                    protocol::play::decode_teleport_to_entity(teleport_reader);
+                const entity::Entity* target = nullptr;
+                if (game_mode == GameMode::spectator) {
+                    for (const auto id : entities.ids()) {
+                        const auto* candidate = entities.find(id);
+                        if (candidate && candidate->uuid() == target_uuid) {
+                            target = candidate;
+                            break;
+                        }
+                    }
+                }
+                if (target && level.inside_border(
+                        {target->position().x, target->position().y,
+                         target->position().z}, 0.3)) {
+                    pending_break.reset();
+                    survival.set_blocking(false);
+                    blocking_hand.reset();
+                    player_position = target->position();
+                    player_yaw = target->yaw();
+                    player_center = {
+                        static_cast<std::int32_t>(std::floor(player_position.x / 16.0)),
+                        static_cast<std::int32_t>(std::floor(player_position.z / 16.0))};
+                    if (streamed_center != player_center) {
+                        stream_chunk_window(player_center);
+                    }
+                    ++next_teleport_id;
+                    pending_teleport = next_teleport_id;
+                    teleport_confirmed = false;
+                    teleport_sent_at = now;
+                    write_compressed_packet(
+                        descriptor,
+                        protocol::play::encode_player_position(
+                            next_teleport_id, player_position.x, player_position.y,
+                            player_position.z, target->yaw(), target->pitch()),
+                        compression_threshold, cipher ? &*cipher : nullptr);
+                }
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::swing)) {
                 protocol::Reader swing_reader(packet);
                 static_cast<void>(protocol::play::decode_swing(swing_reader));
