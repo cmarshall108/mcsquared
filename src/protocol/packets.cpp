@@ -2024,6 +2024,19 @@ BundleItemSelection decode_bundle_item_selection(Reader& packet) {
     return selection;
 }
 
+std::uint8_t decode_change_difficulty(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::change_difficulty)) {
+        throw DecodeError("expected difficulty change packet");
+    }
+    const auto difficulty = packet.read_varint();
+    if (difficulty < 0 || difficulty > 3) {
+        throw DecodeError("difficulty change is out of bounds");
+    }
+    expect_packet_end(packet);
+    return static_cast<std::uint8_t>(difficulty);
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");

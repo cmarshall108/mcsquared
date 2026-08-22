@@ -1033,6 +1033,35 @@ def main() -> None:
                     0x4D, 0x53, 0x63, 0x65, 0x71,
                 ), hex(bundle_id)
 
+            connection.sendall(compressed_frame(0x04, threshold, encode_varint(0)))
+            while True:
+                difficulty_response = read_compressed_packet(connection, threshold)
+                difficulty_id, offset = read_varint(difficulty_response, 0)
+                if difficulty_id == 0x0A:
+                    server_difficulty, offset = read_varint(difficulty_response, offset)
+                    locked = difficulty_response[offset]
+                    offset += 1
+                    assert (server_difficulty, locked, offset) == (
+                        3 if hardcore else 2, int(hardcore), len(difficulty_response)
+                    )
+                    break
+                if difficulty_id == 0x2C:
+                    keep_alive_id = struct.unpack(
+                        ">q", difficulty_response[offset:offset + 8]
+                    )[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                    continue
+                if difficulty_id == 0x01:
+                    entity_id, _ = read_varint(difficulty_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                    continue
+                assert difficulty_id in (
+                    0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                    0x4D, 0x53, 0x63, 0x65, 0x71,
+                ), hex(difficulty_id)
+
             break_start_sequence = 6
             break_sequence = 7
             break_position = (8, spawn_y - 1, 8)

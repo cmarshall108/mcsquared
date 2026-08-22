@@ -3156,6 +3156,16 @@ private:
                     protocol::play::decode_bundle_item_selection(selection_reader));
                 sync_player_inventory();
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::change_difficulty)) {
+                protocol::Reader difficulty_reader(packet);
+                static_cast<void>(
+                    protocol::play::decode_change_difficulty(difficulty_reader));
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_change_difficulty(
+                        static_cast<std::uint8_t>(difficulty), config_.hardcore),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::container_close)) {
                 protocol::Reader close_reader(packet);
                 static_cast<void>(protocol::play::decode_container_close(close_reader));

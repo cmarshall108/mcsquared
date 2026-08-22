@@ -1002,6 +1002,18 @@ void test_play_streaming_packets() {
     } catch (const mc::protocol::DecodeError&) {
     }
 
+    Bytes difficulty_change{0x04, 0x03};
+    Reader difficulty_change_reader(difficulty_change);
+    assert(mc::protocol::play::decode_change_difficulty(difficulty_change_reader) == 3);
+    try {
+        Bytes invalid_difficulty_change{0x04, 0x04};
+        Reader invalid_difficulty_change_reader(invalid_difficulty_change);
+        static_cast<void>(mc::protocol::play::decode_change_difficulty(
+            invalid_difficulty_change_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

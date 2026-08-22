@@ -303,6 +303,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Authorize client flight toggles only in Creative/Spectator and correct denied requests
 - [x] Suppress movement exhaustion and fall-distance accumulation during authorized flight
 - [x] Implement `/difficulty peaceful|easy|normal|hard` with protocol synchronization
+- [x] Decode direct client difficulty requests and enforce authoritative/Hardcore correction
 - [ ] Implement Creative inventory actions, instant breaking, flight, pick block, and operator block restrictions
 - [x] Implement bounded component-free Creative hotbar/offhand slot mutation with authoritative correction
 - [x] Implement Creative instant breaking and non-consuming block placement
