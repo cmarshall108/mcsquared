@@ -3602,6 +3602,19 @@ private:
                 protocol::Reader carried_reader(packet);
                 active_hotbar_slot = protocol::play::decode_set_carried_item(carried_reader);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::spectator_action)) {
+                protocol::Reader spectator_reader(packet);
+                const auto target =
+                    protocol::play::decode_spectator_action(spectator_reader);
+                auto camera_id = std::int32_t{1};
+                if (game_mode == GameMode::spectator && target &&
+                    entities.find(static_cast<entity::EntityId>(*target))) {
+                    camera_id = *target;
+                }
+                write_compressed_packet(
+                    descriptor, protocol::play::encode_set_camera(camera_id),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::swing)) {
                 protocol::Reader swing_reader(packet);
                 static_cast<void>(protocol::play::decode_swing(swing_reader));

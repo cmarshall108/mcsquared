@@ -1151,6 +1151,29 @@ def main() -> None:
                         0x4D, 0x53, 0x63, 0x65, 0x71,
                     ), hex(mode_id)
 
+            connection.sendall(compressed_frame(0x3E, threshold, encode_varint(3)))
+            while True:
+                camera_response = read_compressed_packet(connection, threshold)
+                camera_id, offset = read_varint(camera_response, 0)
+                if camera_id == 0x5D:
+                    target_id, offset = read_varint(camera_response, offset)
+                    assert (target_id, offset) == (1, len(camera_response))
+                    break
+                if camera_id == 0x2C:
+                    keep_alive_id = struct.unpack(">q", camera_response[offset:offset + 8])[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                    continue
+                if camera_id == 0x01:
+                    entity_id, _ = read_varint(camera_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                    continue
+                assert camera_id in (
+                    0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                    0x4D, 0x53, 0x63, 0x65, 0x71,
+                ), hex(camera_id)
+
             break_start_sequence = 6
             break_sequence = 7
             break_position = (8, spawn_y - 1, 8)

@@ -241,6 +241,14 @@ void test_play_streaming_packets() {
     Reader swing_reader(swing_bytes);
     assert(mc::protocol::play::decode_swing(swing_reader) == 1);
 
+    Bytes clear_spectator_target{0x3E, 0x00};
+    Reader clear_spectator_target_reader(clear_spectator_target);
+    assert(!mc::protocol::play::decode_spectator_action(
+        clear_spectator_target_reader));
+    Bytes spectator_target{0x3E, 0x08};
+    Reader spectator_target_reader(spectator_target);
+    assert(mc::protocol::play::decode_spectator_action(spectator_target_reader) == 7);
+
     const auto packet_body = [](const Bytes& framed) {
         Reader frame(framed);
         const auto size = frame.read_varint();
@@ -257,6 +265,7 @@ void test_play_streaming_packets() {
         std::pair{mc::protocol::play::encode_move_vehicle(
                       {10.5, 70.0, -4.25}, 90.0F, -5.0F),
                   std::int32_t{0x39}},
+        std::pair{mc::protocol::play::encode_set_camera(7), std::int32_t{0x5D}},
         std::pair{mc::protocol::play::encode_chunk_cache_radius(2),
                   std::int32_t{0x5F}},
         std::pair{mc::protocol::play::encode_experience(0.0F, 0, 0),

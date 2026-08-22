@@ -306,6 +306,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Decode direct client game-mode requests and enforce authoritative mode/ability correction
 - [x] Enforce Adventure world-modification restrictions while retaining survival combat and item use
 - [x] Enforce Spectator invulnerability, collision bypass, forced flight, dismount, and interaction suppression
+- [x] Implement bounded Spectator camera selection with mode/target authorization and correction
 - [x] Authorize client flight toggles only in Creative/Spectator and correct denied requests
 - [x] Suppress movement exhaustion and fall-distance accumulation during authorized flight
 - [x] Implement `/difficulty peaceful|easy|normal|hard` with protocol synchronization

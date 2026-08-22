@@ -298,6 +298,7 @@ enum class ServerboundPacketId : std::int32_t {
 	set_beacon = 0x34,
 	set_carried_item = 0x35,
 	set_creative_mode_slot = 0x38,
+	spectator_action = 0x3E,
 	swing = 0x3F,
 	use_item_on = 0x42,
 	use_item = 0x43,
@@ -370,6 +371,7 @@ enum class ClientboundPacketId : std::int32_t {
 	set_border_size = 0x5A,
 	set_border_warning_delay = 0x5B,
 	set_border_warning_distance = 0x5C,
+	set_camera = 0x5D,
 	set_chunk_cache_center = 0x5E,
 	set_chunk_cache_radius = 0x5F,
 	set_cursor_item = 0x60,
@@ -757,6 +759,7 @@ void decode_player_loaded(Reader& packet);
 [[nodiscard]] SeenAdvancements decode_seen_advancements(Reader& packet);
 [[nodiscard]] std::int16_t decode_set_carried_item(Reader& packet);
 [[nodiscard]] CreativeSlotChange decode_set_creative_mode_slot(Reader& packet);
+[[nodiscard]] std::optional<std::int32_t> decode_spectator_action(Reader& packet);
 [[nodiscard]] std::uint8_t decode_swing(Reader& packet);
 [[nodiscard]] UseItemOn decode_use_item_on(Reader& packet);
 [[nodiscard]] UseItem decode_use_item(Reader& packet);
@@ -775,6 +778,7 @@ void decode_player_loaded(Reader& packet);
 										 float flying_speed,
 										 float walking_speed);
 [[nodiscard]] Bytes encode_move_vehicle(EntityVector position, float yaw, float pitch);
+[[nodiscard]] Bytes encode_set_camera(std::int32_t entity_id);
 [[nodiscard]] Bytes encode_border_center(double x, double z);
 [[nodiscard]] Bytes encode_border_lerp_size(double old_size,
 										 double new_size,

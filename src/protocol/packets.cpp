@@ -1473,6 +1473,18 @@ CreativeSlotChange decode_set_creative_mode_slot(Reader& packet) {
     return change;
 }
 
+std::optional<std::int32_t> decode_spectator_action(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::spectator_action)) {
+        throw DecodeError("expected spectator action packet");
+    }
+    const auto encoded = packet.read_varint();
+    if (encoded < 0) throw DecodeError("spectator target is invalid");
+    expect_packet_end(packet);
+    if (encoded == 0) return std::nullopt;
+    return encoded - 1;
+}
+
 std::uint8_t decode_swing(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::swing)) {
         throw DecodeError("expected Play swing packet");
@@ -1587,6 +1599,13 @@ Bytes encode_move_vehicle(const EntityVector position, const float yaw, const fl
     write_f32_be(payload, yaw);
     write_f32_be(payload, pitch);
     return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::move_vehicle), payload);
+}
+
+Bytes encode_set_camera(const std::int32_t entity_id) {
+    if (entity_id < 0) throw std::invalid_argument("camera entity ID is invalid");
+    Bytes payload;
+    write_varint(payload, entity_id);
+    return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::set_camera), payload);
 }
 
 Bytes encode_border_center(const double x, const double z) {
