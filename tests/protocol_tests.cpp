@@ -2,6 +2,7 @@
 #include "mc/protocol/crypto.hpp"
 #include "mc/protocol/nbt.hpp"
 #include "mc/protocol/packets.hpp"
+#include "mc/world/generation.hpp"
 
 #include <algorithm>
 #include <array>
@@ -1107,6 +1108,44 @@ void test_play_streaming_packets() {
     assert(((first_global_word >> 15U) & 0x7FFFU) == 1);
     assert(((first_global_word >> 30U) & 0x7FFFU) == 2);
     assert(((first_global_word >> 45U) & 0x7FFFU) == 3);
+
+    mc::world::ChunkGenerator generator({4'242, 63});
+    auto lit_chunk = generator.generate({2, -3});
+    constexpr std::size_t light_x = 4;
+    constexpr std::size_t light_z = 7;
+    const auto light_y = lit_chunk.height(light_x, light_z) + 1;
+    const auto read_skylight = [&](const mc::world::Chunk& chunk) {
+        Reader light(packet_body(mc::protocol::play::encode_light_update(chunk)));
+        assert(light.read_varint() == 0x30);
+        assert(light.read_varint() == 2);
+        assert(light.read_varint() == -3);
+        assert(light.read_bitset(1) == std::vector<std::uint64_t>{(1U << 26U) - 1U});
+        assert(light.read_bitset(1).empty());
+        assert(light.read_bitset(1).empty());
+        assert(light.read_bitset(1) == std::vector<std::uint64_t>{(1U << 26U) - 1U});
+        assert(light.read_varint() == 26);
+        std::array<Bytes, 26> sections;
+        for (auto& section : sections) {
+            section = light.read_byte_array(2'048);
+            assert(section.size() == 2'048);
+        }
+        assert(light.read_varint() == 0);
+        assert(light.empty());
+        const auto light_section = static_cast<std::size_t>(
+            (light_y - (mc::world::min_build_y - mc::world::section_height)) /
+            mc::world::section_height);
+        const auto local_y = static_cast<std::size_t>(
+            light_y - (mc::world::min_build_y - mc::world::section_height) -
+            static_cast<std::int32_t>(light_section * mc::world::section_height));
+        const auto index = (local_y * mc::world::chunk_width + light_z) *
+            mc::world::chunk_width + light_x;
+        const auto packed_light = sections[light_section][index / 2];
+        return static_cast<std::uint8_t>(
+            index % 2 == 0 ? packed_light & 0x0FU : packed_light >> 4U);
+    };
+    assert(read_skylight(lit_chunk) == 15);
+    lit_chunk.set_block(light_x, light_y + 1, light_z, mc::world::BlockId::stone);
+    assert(read_skylight(lit_chunk) == 0);
     assert(packet.empty());
 }
 

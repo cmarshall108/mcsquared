@@ -87,6 +87,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement single-value and local chunk section/biome palettes, packed storage, batch markers, populated heightmaps, block-entity lists, and light masks
 - [ ] Implement global palettes, populated block entities, and incremental light updates
 - [x] Implement bounded global block-state and biome palette fallback encoding
+- [x] Implement heightmap-derived skylight arrays and incremental light updates after block changes
 - [ ] Implement signed chat, message acknowledgement, filtering, reporting metadata, and secure-chat enforcement
 - [ ] Fuzz every decoder and verify malformed input cannot exhaust memory or stall workers
 

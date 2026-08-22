@@ -322,6 +322,7 @@ enum class ClientboundPacketId : std::int32_t {
 	level_chunk_with_light = 0x2D,
 	level_event = 0x2E,
 	level_particles = 0x2F,
+	light_update = 0x30,
 	login = 0x31,
 	move_entity_pos = 0x35,
 	move_entity_pos_rot = 0x36,
@@ -888,6 +889,7 @@ void decode_player_loaded(Reader& packet);
 [[nodiscard]] Bytes encode_chunk_batch_finished(std::int32_t batch_size);
 [[nodiscard]] Bytes encode_level_chunks_load_start();
 [[nodiscard]] Bytes encode_level_chunk(const world::Chunk& chunk);
+[[nodiscard]] Bytes encode_light_update(const world::Chunk& chunk);
 
 } // namespace play
 

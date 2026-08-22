@@ -2823,6 +2823,52 @@ Bytes encode_paletted_container(const std::span<const std::int32_t> values,
     return output;
 }
 
+namespace {
+
+using LightSection = std::array<std::uint8_t, 2'048>;
+
+[[nodiscard]] std::array<LightSection, world::section_count + 2> sky_light_sections(
+    const world::Chunk& chunk) {
+    std::array<LightSection, world::section_count + 2> sections{};
+    for (std::size_t light_section = 0; light_section < sections.size(); ++light_section) {
+        const auto section_y = world::min_build_y - world::section_height +
+            static_cast<std::int32_t>(light_section * world::section_height);
+        for (std::size_t local_y = 0; local_y < world::section_height; ++local_y) {
+            const auto block_y = section_y + static_cast<std::int32_t>(local_y);
+            for (std::size_t z = 0; z < world::chunk_width; ++z) {
+                for (std::size_t x = 0; x < world::chunk_width; ++x) {
+                    if (block_y <= chunk.height(x, z)) continue;
+                    const auto index = (local_y * world::chunk_width + z) *
+                        world::chunk_width + x;
+                    auto& packed = sections[light_section][index / 2];
+                    packed |= static_cast<std::uint8_t>(
+                        (index % 2 == 0 ? 0x0FU : 0xF0U));
+                }
+            }
+        }
+    }
+    return sections;
+}
+
+void write_light_data(Bytes& output, const world::Chunk& chunk) {
+    constexpr auto light_section_count = world::section_count + 2;
+    constexpr auto all_light_sections =
+        (std::uint64_t{1} << light_section_count) - 1U;
+    const std::array full_light_mask{all_light_sections};
+    write_bitset(output, full_light_mask);
+    write_bitset(output, {});
+    write_bitset(output, {});
+    write_bitset(output, full_light_mask);
+    const auto sky_light = sky_light_sections(chunk);
+    write_varint(output, static_cast<std::int32_t>(sky_light.size()));
+    for (const auto& section : sky_light) {
+        write_byte_array(output, section);
+    }
+    write_varint(output, 0);
+}
+
+} // namespace
+
 Bytes encode_level_chunk(const world::Chunk& chunk) {
     const auto chunk_position = chunk.position();
 
@@ -2884,26 +2930,18 @@ Bytes encode_level_chunk(const world::Chunk& chunk) {
     write_varint(payload, static_cast<std::int32_t>(section_data.size()));
     payload.insert(payload.end(), section_data.begin(), section_data.end());
     write_varint(payload, 0);
-
-    constexpr std::uint64_t all_light_sections = (std::uint64_t{1} << 26U) - 1U;
-    const std::array full_light_mask{all_light_sections};
-    write_bitset(payload, full_light_mask);
-    write_bitset(payload, {});
-    write_bitset(payload, {});
-    write_bitset(payload, full_light_mask);
-    write_varint(payload, 26);
-    const std::array<std::uint8_t, 2'048> full_sky_light = [] {
-        std::array<std::uint8_t, 2'048> result{};
-        result.fill(0xFFU);
-        return result;
-    }();
-    for (std::size_t section = 0; section < 26; ++section) {
-        write_byte_array(payload, full_sky_light);
-    }
-    write_varint(payload, 0);
+    write_light_data(payload, chunk);
 
     return frame_packet(
         static_cast<std::int32_t>(ClientboundPacketId::level_chunk_with_light), payload);
+}
+
+Bytes encode_light_update(const world::Chunk& chunk) {
+    Bytes payload;
+    write_varint(payload, chunk.position().x);
+    write_varint(payload, chunk.position().z);
+    write_light_data(payload, chunk);
+    return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::light_update), payload);
 }
 
 } // namespace play

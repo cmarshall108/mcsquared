@@ -820,7 +820,11 @@ def main() -> None:
             block_update_count, offset = read_varint(chunk, offset)
             assert bitsets == [[(1 << 26) - 1], [], [], [(1 << 26) - 1]]
             assert sky_update_count == 26
-            assert all(data == b"\xff" * 2048 for data in sky_updates)
+            assert all(len(data) == 2048 for data in sky_updates)
+            assert sky_updates[0] == b"\x00" * 2048
+            assert sky_updates[-1] == b"\xff" * 2048
+            assert any(data not in (b"\x00" * 2048, b"\xff" * 2048)
+                       for data in sky_updates)
             assert block_update_count == 0
             assert offset == len(chunk)
 
@@ -911,6 +915,10 @@ def main() -> None:
                     )[0]
                     assert state_id == 0
                     break_update_seen = True
+                elif gameplay_id == 0x30:
+                    light_x, offset = read_varint(gameplay, offset)
+                    light_z, offset = read_varint(gameplay, offset)
+                    assert (light_x, light_z) == (0, 0)
                 elif gameplay_id == 0x04:
                     sequence, offset = read_varint(gameplay, offset)
                     assert sequence in (break_start_sequence, break_sequence)
@@ -967,6 +975,10 @@ def main() -> None:
                     )[0]
                     assert state_id == 10
                     place_update_seen = True
+                elif gameplay_id == 0x30:
+                    light_x, offset = read_varint(gameplay, offset)
+                    light_z, offset = read_varint(gameplay, offset)
+                    assert (light_x, light_z) == (0, 0)
                 elif gameplay_id == 0x6C:
                     slot, offset = read_varint(gameplay, offset)
                     count, offset = read_varint(gameplay, offset)

@@ -1504,6 +1504,14 @@ private:
                     {position.x, position.y, position.z},
                     protocol::play::protocol_block_state_id(block_id)),
                 compression_threshold, cipher ? &*cipher : nullptr);
+            const auto chunk_x = static_cast<std::int32_t>(
+                std::floor(static_cast<double>(position.x) / world::chunk_width));
+            const auto chunk_z = static_cast<std::int32_t>(
+                std::floor(static_cast<double>(position.z) / world::chunk_width));
+            write_compressed_packet(
+                descriptor,
+                protocol::play::encode_light_update(*level.chunk({chunk_x, chunk_z})),
+                compression_threshold, cipher ? &*cipher : nullptr);
         };
         const auto settle_and_send = [&](const core::BlockPosition position) {
             block_ticks.notify_neighbors(position);
