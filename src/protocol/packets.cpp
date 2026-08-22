@@ -224,11 +224,7 @@ Bytes encode_cookie_request(const std::string_view key) {
         static_cast<std::int32_t>(ClientboundPacketId::cookie_request), key);
 }
 
-ClientInformation decode_client_information(Reader& packet) {
-    if (packet.read_varint() !=
-        static_cast<std::int32_t>(ServerboundPacketId::client_information)) {
-        throw DecodeError("expected Configuration client information packet");
-    }
+ClientInformation decode_client_information_payload(Reader& packet) {
     ClientInformation information{
         packet.read_string(16),
         packet.read_i8(),
@@ -242,10 +238,18 @@ ClientInformation decode_client_information(Reader& packet) {
     };
     if (information.chat_visibility > 2 || information.main_hand > 1 ||
         information.particle_status > 2) {
-        throw DecodeError("Configuration client information enum is out of bounds");
+        throw DecodeError("client information enum is out of bounds");
     }
     expect_packet_end(packet);
     return information;
+}
+
+ClientInformation decode_client_information(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::client_information)) {
+        throw DecodeError("expected Configuration client information packet");
+    }
+    return decode_client_information_payload(packet);
 }
 
 CookieResponse decode_cookie_response(Reader& packet) {
@@ -1043,6 +1047,14 @@ std::pair<bool, bool> decode_player_status(Reader& packet) {
 
 void decode_client_tick_end(Reader& packet) {
     decode_empty_play_packet(packet, ServerboundPacketId::client_tick_end);
+}
+
+configuration::ClientInformation decode_client_information(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::client_information)) {
+        throw DecodeError("expected Play client information packet");
+    }
+    return configuration::decode_client_information_payload(packet);
 }
 
 void decode_configuration_acknowledged(Reader& packet) {

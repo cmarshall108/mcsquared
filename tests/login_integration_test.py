@@ -874,6 +874,18 @@ def main() -> None:
             assert (packet_id, batch_size, offset) == (0x0B, 25, len(batch_finished))
 
             spawned_entity_ids = set()
+            play_client_information = (
+                encode_string("en_gb")
+                + struct.pack(">b", 8)
+                + encode_varint(0)
+                + b"\x00\x7f"
+                + encode_varint(0)
+                + b"\x00\x01"
+                + encode_varint(1)
+            )
+            connection.sendall(
+                compressed_frame(0x0E, threshold, play_client_information)
+            )
             connection.sendall(compressed_frame(0x06, threshold, encode_varint(0)))
             connection.sendall(
                 compressed_frame(0x0B, threshold, struct.pack(">f", 4.0))

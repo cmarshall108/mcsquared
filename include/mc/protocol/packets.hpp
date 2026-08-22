@@ -260,6 +260,7 @@ enum class ServerboundPacketId : std::int32_t {
 	chunk_batch_received = 0x0B,
 	client_command = 0x0C,
 	client_tick_end = 0x0D,
+	client_information = 0x0E,
 	command_suggestion = 0x0F,
 	configuration_acknowledged = 0x10,
 	container_button_click = 0x11,
@@ -705,6 +706,7 @@ void decode_empty_chat_ack(Reader& packet);
 [[nodiscard]] PlayerRotation decode_player_rotation(Reader& packet);
 [[nodiscard]] std::pair<bool, bool> decode_player_status(Reader& packet);
 void decode_client_tick_end(Reader& packet);
+[[nodiscard]] configuration::ClientInformation decode_client_information(Reader& packet);
 void decode_configuration_acknowledged(Reader& packet);
 [[nodiscard]] CookieResponse decode_cookie_response(Reader& packet);
 void decode_player_loaded(Reader& packet);

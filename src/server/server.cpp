@@ -3121,6 +3121,11 @@ private:
                 protocol::Reader tick_reader(packet);
                 protocol::play::decode_client_tick_end(tick_reader);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::client_information)) {
+                protocol::Reader information_reader(packet);
+                static_cast<void>(
+                    protocol::play::decode_client_information(information_reader));
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::command_suggestion)) {
                 protocol::Reader suggestion_reader(packet);
                 const auto request =

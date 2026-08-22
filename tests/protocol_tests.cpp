@@ -1670,6 +1670,17 @@ void test_configuration_packets() {
     assert(client_information.main_hand == 1);
     assert(client_information.particle_status == 2);
 
+    auto play_client_information_bytes = client_information_bytes;
+    play_client_information_bytes.front() = 0x0E;
+    Reader play_client_information_reader(play_client_information_bytes);
+    const auto play_client_information =
+        mc::protocol::play::decode_client_information(play_client_information_reader);
+    assert(play_client_information.language == "en_us");
+    assert(play_client_information.view_distance == 12);
+    assert(play_client_information.chat_visibility == 1);
+    assert(play_client_information.main_hand == 1);
+    assert(play_client_information.particle_status == 2);
+
     Bytes custom_payload_bytes{0x02};
     mc::protocol::write_identifier(custom_payload_bytes, "mcsquared:test");
     custom_payload_bytes.insert(custom_payload_bytes.end(), {7, 8, 9});
