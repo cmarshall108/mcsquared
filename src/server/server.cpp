@@ -3089,6 +3089,29 @@ private:
                 protocol::Reader tick_reader(packet);
                 protocol::play::decode_client_tick_end(tick_reader);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::command_suggestion)) {
+                protocol::Reader suggestion_reader(packet);
+                const auto request =
+                    protocol::play::decode_command_suggestion(suggestion_reader);
+                const auto start = request.command.front() == '/' ? 1U : 0U;
+                const auto prefix = std::string_view(request.command).substr(start);
+                std::vector<std::string> suggestions;
+                if (prefix.find(' ') == std::string_view::npos) {
+                    constexpr std::array<std::string_view, 16> command_roots{
+                        "clear", "difficulty", "effect", "experience", "gamemode",
+                        "gamerule", "give", "kill", "say", "summon", "teleport",
+                        "time", "tp", "weather", "worldborder", "xp"};
+                    for (const auto root : command_roots) {
+                        if (root.starts_with(prefix)) suggestions.emplace_back(root);
+                    }
+                }
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_command_suggestions(
+                        request.id, static_cast<std::int32_t>(start),
+                        static_cast<std::int32_t>(prefix.size()), suggestions),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::configuration_acknowledged)) {
                 protocol::Reader configuration_reader(packet);
                 protocol::play::decode_configuration_acknowledged(configuration_reader);

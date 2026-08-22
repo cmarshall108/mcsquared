@@ -310,6 +310,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Decode protocol 776 pick-item-from-entity requests and map living types to spawn eggs
 - [x] Implement Creative-only entity pick with reach, line-of-sight, and hotbar synchronization
 - [ ] Implement chat, commands, command permissions, suggestions, selectors, text components, titles, boss bars, and system messages
+- [x] Implement bounded root command suggestions for every live command handler
 - [x] Implement unsigned `/say`, `/time`, `/weather`, and `/gamemode` command handling with system feedback
 - [x] Implement `/teleport` and `/tp` with finite bounds, border validation, chunk streaming, and acknowledgement
 - [x] Implement `/kill` through the shared death, drop, dismount, statistics, and health-sync pipeline

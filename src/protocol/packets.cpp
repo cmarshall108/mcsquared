@@ -1995,6 +1995,19 @@ std::string decode_chat_command(Reader& packet) {
     return command;
 }
 
+CommandSuggestionRequest decode_command_suggestion(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::command_suggestion)) {
+        throw DecodeError("expected command suggestion packet");
+    }
+    CommandSuggestionRequest request{packet.read_varint(), packet.read_string(256)};
+    if (request.id < 0 || request.command.empty()) {
+        throw DecodeError("command suggestion request is invalid");
+    }
+    expect_packet_end(packet);
+    return request;
+}
+
 EntityInteraction decode_interact(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::interact)) {
         throw DecodeError("expected entity interaction packet");
@@ -2740,6 +2753,29 @@ Bytes encode_chunk_batch_finished(const std::int32_t batch_size) {
     write_varint(payload, batch_size);
     return frame_packet(
         static_cast<std::int32_t>(ClientboundPacketId::chunk_batch_finished), payload);
+}
+
+Bytes encode_command_suggestions(const std::int32_t id,
+                                 const std::int32_t start,
+                                 const std::int32_t length,
+                                 const std::span<const std::string> suggestions) {
+    if (id < 0 || start < 0 || length < 0 || suggestions.size() > 128) {
+        throw std::invalid_argument("command suggestion fields are invalid");
+    }
+    Bytes payload;
+    write_varint(payload, id);
+    write_varint(payload, start);
+    write_varint(payload, length);
+    write_varint(payload, static_cast<std::int32_t>(suggestions.size()));
+    for (const auto& suggestion : suggestions) {
+        if (suggestion.empty() || suggestion.size() > 256) {
+            throw std::invalid_argument("command suggestion text is invalid");
+        }
+        write_string(payload, suggestion);
+        write_bool(payload, false);
+    }
+    return frame_packet(
+        static_cast<std::int32_t>(ClientboundPacketId::command_suggestions), payload);
 }
 
 Bytes encode_level_chunks_load_start() {

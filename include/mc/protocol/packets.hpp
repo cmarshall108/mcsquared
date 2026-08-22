@@ -255,6 +255,7 @@ enum class ServerboundPacketId : std::int32_t {
 	chunk_batch_received = 0x0B,
 	client_command = 0x0C,
 	client_tick_end = 0x0D,
+	command_suggestion = 0x0F,
 	configuration_acknowledged = 0x10,
 	container_button_click = 0x11,
 	container_click = 0x12,
@@ -302,6 +303,7 @@ enum class ClientboundPacketId : std::int32_t {
 	change_difficulty = 0x0A,
 	chunk_batch_finished = 0x0B,
 	chunk_batch_start = 0x0C,
+	command_suggestions = 0x0F,
 	clear_titles = 0x0E,
 	container_close = 0x11,
 	container_set_content = 0x12,
@@ -417,6 +419,11 @@ struct ContainerSlotStateChange final {
 struct CreativeSlotChange final {
 	std::int16_t slot;
 	SimpleItemStack item;
+};
+
+struct CommandSuggestionRequest final {
+	std::int32_t id;
+	std::string command;
 };
 
 enum class ContainerInput : std::uint8_t {
@@ -651,6 +658,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] std::int64_t decode_keep_alive(Reader& packet);
 [[nodiscard]] std::int32_t decode_attack(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
+[[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);
 [[nodiscard]] Bytes encode_player_position(std::int32_t teleport_id,
 										   double x,
@@ -907,6 +915,10 @@ void decode_player_loaded(Reader& packet);
 														 float pitch = 0.0F);
 [[nodiscard]] Bytes encode_chunk_batch_start();
 [[nodiscard]] Bytes encode_chunk_batch_finished(std::int32_t batch_size);
+[[nodiscard]] Bytes encode_command_suggestions(std::int32_t id,
+											 std::int32_t start,
+											 std::int32_t length,
+											 std::span<const std::string> suggestions);
 [[nodiscard]] Bytes encode_level_chunks_load_start();
 [[nodiscard]] Bytes encode_level_chunk(const world::Chunk& chunk);
 [[nodiscard]] Bytes encode_light_update(const world::Chunk& chunk);

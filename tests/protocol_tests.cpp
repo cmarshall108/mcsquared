@@ -969,6 +969,29 @@ void test_play_streaming_packets() {
         assert(mc::protocol::play::decode_chat_command(command_request_reader) ==
             "time set day");
 
+    Bytes suggestion_request{0x0F, 0x2A};
+    mc::protocol::write_string(suggestion_request, "/ga");
+    Reader suggestion_request_reader(suggestion_request);
+    const auto suggestion =
+        mc::protocol::play::decode_command_suggestion(suggestion_request_reader);
+    assert(suggestion.id == 42 && suggestion.command == "/ga");
+
+    const std::array<std::string, 2> suggestions{"gamemode", "gamerule"};
+    const auto framed_suggestions =
+        mc::protocol::play::encode_command_suggestions(42, 1, 2, suggestions);
+    const auto suggestion_body = packet_body(framed_suggestions);
+    Reader suggestion_response(suggestion_body);
+    assert(suggestion_response.read_varint() == 0x0F);
+    assert(suggestion_response.read_varint() == 42);
+    assert(suggestion_response.read_varint() == 1);
+    assert(suggestion_response.read_varint() == 2);
+    assert(suggestion_response.read_varint() == 2);
+    assert(suggestion_response.read_string(256) == "gamemode");
+    assert(!suggestion_response.read_bool());
+    assert(suggestion_response.read_string(256) == "gamerule");
+    assert(!suggestion_response.read_bool());
+    assert(suggestion_response.empty());
+
     Reader encoded_motion(motion_body);
     assert(encoded_motion.read_varint() == 0x65);
     assert(encoded_motion.read_varint() == 7);
