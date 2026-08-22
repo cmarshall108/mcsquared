@@ -211,6 +211,28 @@ void test_play_streaming_packets() {
     const auto status = mc::protocol::play::decode_player_status(status_reader);
     assert(!status.first && status.second);
 
+    Bytes vehicle_move{0x22};
+    mc::protocol::write_f64_be(vehicle_move, 10.5);
+    mc::protocol::write_f64_be(vehicle_move, 70.0);
+    mc::protocol::write_f64_be(vehicle_move, -4.25);
+    mc::protocol::write_f32_be(vehicle_move, 90.0F);
+    mc::protocol::write_f32_be(vehicle_move, -5.0F);
+    mc::protocol::write_bool(vehicle_move, true);
+    Reader vehicle_move_reader(vehicle_move);
+    const auto decoded_vehicle_move =
+        mc::protocol::play::decode_move_vehicle(vehicle_move_reader);
+    assert(decoded_vehicle_move.position.x == 10.5);
+    assert(decoded_vehicle_move.position.y == 70.0);
+    assert(decoded_vehicle_move.position.z == -4.25);
+    assert(decoded_vehicle_move.yaw == 90.0F);
+    assert(decoded_vehicle_move.pitch == -5.0F);
+    assert(decoded_vehicle_move.on_ground);
+
+    Bytes paddle_boat{0x23, 0x01, 0x00};
+    Reader paddle_boat_reader(paddle_boat);
+    const auto paddles = mc::protocol::play::decode_paddle_boat(paddle_boat_reader);
+    assert(paddles.left && !paddles.right);
+
     Bytes carried_bytes{0x35, 0x00, 0x08};
     Reader carried_reader(carried_bytes);
     assert(mc::protocol::play::decode_set_carried_item(carried_reader) == 8);
@@ -232,6 +254,9 @@ void test_play_streaming_packets() {
         std::pair{mc::protocol::play::encode_player_abilities(
                       false, false, false, false, 0.05F, 0.1F),
                   std::int32_t{0x40}},
+        std::pair{mc::protocol::play::encode_move_vehicle(
+                      {10.5, 70.0, -4.25}, 90.0F, -5.0F),
+                  std::int32_t{0x39}},
         std::pair{mc::protocol::play::encode_chunk_cache_radius(2),
                   std::int32_t{0x5F}},
         std::pair{mc::protocol::play::encode_experience(0.0F, 0, 0),

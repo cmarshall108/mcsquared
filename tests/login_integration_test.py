@@ -876,6 +876,14 @@ def main() -> None:
             spawned_entity_ids = set()
             connection.sendall(
                 compressed_frame(
+                    0x22,
+                    threshold,
+                    struct.pack(">dddffB", 0.0, float(spawn_y), 0.0, 0.0, 0.0, 1),
+                )
+            )
+            connection.sendall(compressed_frame(0x23, threshold, b"\x01\x00"))
+            connection.sendall(
+                compressed_frame(
                     0x44,
                     threshold,
                     encode_string("mcsquared:action") + encode_byte_array(b"\x00"),

@@ -1053,6 +1053,34 @@ std::pair<bool, bool> decode_player_status(Reader& packet) {
     return flags;
 }
 
+VehicleMove decode_move_vehicle(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::move_vehicle)) {
+        throw DecodeError("expected vehicle move packet");
+    }
+    VehicleMove move{{packet.read_f64_be(), packet.read_f64_be(), packet.read_f64_be()},
+                     packet.read_f32_be(), packet.read_f32_be(), packet.read_bool()};
+    if (!std::isfinite(move.position.x) || !std::isfinite(move.position.y) ||
+        !std::isfinite(move.position.z) || !std::isfinite(move.yaw) ||
+        !std::isfinite(move.pitch) || std::abs(move.position.x) > 30'000'000.0 ||
+        std::abs(move.position.y) > 20'000'000.0 ||
+        std::abs(move.position.z) > 30'000'000.0) {
+        throw DecodeError("vehicle move fields are invalid");
+    }
+    expect_packet_end(packet);
+    return move;
+}
+
+PaddleState decode_paddle_boat(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::paddle_boat)) {
+        throw DecodeError("expected paddle boat packet");
+    }
+    PaddleState state{packet.read_bool(), packet.read_bool()};
+    expect_packet_end(packet);
+    return state;
+}
+
 void decode_client_tick_end(Reader& packet) {
     decode_empty_play_packet(packet, ServerboundPacketId::client_tick_end);
 }
@@ -1543,6 +1571,22 @@ Bytes encode_player_abilities(const bool invulnerable,
     write_f32_be(payload, flying_speed);
     write_f32_be(payload, walking_speed);
     return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::player_abilities), payload);
+}
+
+Bytes encode_move_vehicle(const EntityVector position, const float yaw, const float pitch) {
+    if (!std::isfinite(position.x) || !std::isfinite(position.y) ||
+        !std::isfinite(position.z) || !std::isfinite(yaw) || !std::isfinite(pitch) ||
+        std::abs(position.x) > 30'000'000.0 || std::abs(position.y) > 20'000'000.0 ||
+        std::abs(position.z) > 30'000'000.0) {
+        throw std::invalid_argument("vehicle correction fields are invalid");
+    }
+    Bytes payload;
+    write_f64_be(payload, position.x);
+    write_f64_be(payload, position.y);
+    write_f64_be(payload, position.z);
+    write_f32_be(payload, yaw);
+    write_f32_be(payload, pitch);
+    return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::move_vehicle), payload);
 }
 
 Bytes encode_border_center(const double x, const double z) {

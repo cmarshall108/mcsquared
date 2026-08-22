@@ -254,6 +254,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement interaction-driven mounting of rideable passive entities
 - [x] Synchronize external player passengers on mount, remount, and dismount
 - [x] Route directional player input and jump impulses to mounted vehicles
+- [x] Decode bounded vehicle move/paddle packets and correct client pose to authoritative vehicle state
 - [x] Implement sneak dismount with safe rider repositioning
 - [x] Implement rider position following and forced eject when vehicles disappear
 - [x] Implement bounded hunger, saturation, exhaustion conversion, and food-consumption state

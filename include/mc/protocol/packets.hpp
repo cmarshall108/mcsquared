@@ -277,6 +277,8 @@ enum class ServerboundPacketId : std::int32_t {
 	move_player_pos_rot = 0x1F,
 	move_player_rot = 0x20,
 	move_player_status_only = 0x21,
+	move_vehicle = 0x22,
+	paddle_boat = 0x23,
 	pick_item_from_block = 0x24,
 	pick_item_from_entity = 0x25,
 	ping_request = 0x26,
@@ -341,6 +343,7 @@ enum class ClientboundPacketId : std::int32_t {
 	move_entity_pos = 0x35,
 	move_entity_pos_rot = 0x36,
 	move_entity_rot = 0x38,
+	move_vehicle = 0x39,
 	open_book = 0x3A,
 	open_screen = 0x3B,
 	open_sign_editor = 0x3C,
@@ -408,6 +411,18 @@ struct EntityVector final {
 	double x;
 	double y;
 	double z;
+};
+
+struct VehicleMove final {
+	EntityVector position;
+	float yaw;
+	float pitch;
+	bool on_ground;
+};
+
+struct PaddleState final {
+	bool left;
+	bool right;
 };
 
 struct SimpleItemStack final {
@@ -709,6 +724,8 @@ void decode_empty_chat_ack(Reader& packet);
 [[nodiscard]] PlayerPosition decode_player_position(Reader& packet);
 [[nodiscard]] PlayerRotation decode_player_rotation(Reader& packet);
 [[nodiscard]] std::pair<bool, bool> decode_player_status(Reader& packet);
+[[nodiscard]] VehicleMove decode_move_vehicle(Reader& packet);
+[[nodiscard]] PaddleState decode_paddle_boat(Reader& packet);
 void decode_client_tick_end(Reader& packet);
 [[nodiscard]] configuration::ClientInformation decode_client_information(Reader& packet);
 [[nodiscard]] configuration::CustomPayload decode_custom_payload(Reader& packet);
@@ -757,6 +774,7 @@ void decode_player_loaded(Reader& packet);
 										 bool instant_build,
 										 float flying_speed,
 										 float walking_speed);
+[[nodiscard]] Bytes encode_move_vehicle(EntityVector position, float yaw, float pitch);
 [[nodiscard]] Bytes encode_border_center(double x, double z);
 [[nodiscard]] Bytes encode_border_lerp_size(double old_size,
 										 double new_size,

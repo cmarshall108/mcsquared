@@ -3117,6 +3117,25 @@ private:
                 survival.record_movement(
                     player_position, player_position, on_ground, false);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::move_vehicle)) {
+                protocol::Reader vehicle_reader(packet);
+                static_cast<void>(protocol::play::decode_move_vehicle(vehicle_reader));
+                if (player_vehicle) {
+                    if (const auto* vehicle = entities.find(*player_vehicle)) {
+                        write_compressed_packet(
+                            descriptor,
+                            protocol::play::encode_move_vehicle(
+                                {vehicle->position().x, vehicle->position().y,
+                                 vehicle->position().z},
+                                vehicle->yaw(), vehicle->pitch()),
+                            compression_threshold, cipher ? &*cipher : nullptr);
+                    }
+                }
+            } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::paddle_boat)) {
+                protocol::Reader paddle_reader(packet);
+                static_cast<void>(protocol::play::decode_paddle_boat(paddle_reader));
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::client_tick_end)) {
                 protocol::Reader tick_reader(packet);
                 protocol::play::decode_client_tick_end(tick_reader);
