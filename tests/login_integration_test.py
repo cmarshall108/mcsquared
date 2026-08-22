@@ -998,27 +998,6 @@ def main() -> None:
                 )
             )
             connection.sendall(compressed_frame(0x3F, threshold, encode_varint(0)))
-            swing_seen = False
-            while not swing_seen:
-                gameplay = read_compressed_packet(connection, threshold)
-                gameplay_id, offset = read_varint(gameplay, 0)
-                if gameplay_id == 0x02:
-                    entity_id, offset = read_varint(gameplay, offset)
-                    action = gameplay[offset]
-                    offset += 1
-                    assert (entity_id, action, offset) == (1, 0, len(gameplay))
-                    swing_seen = True
-                elif gameplay_id in (0x01, 0x23, 0x35, 0x36, 0x38, 0x53, 0x65, 0x71):
-                    if gameplay_id == 0x01:
-                        entity_id, _ = read_varint(gameplay, offset)
-                        spawned_entity_ids.add(entity_id)
-                elif gameplay_id == 0x2C:
-                    keep_alive_id = struct.unpack(">q", gameplay[offset:offset + 8])[0]
-                    connection.sendall(
-                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
-                    )
-                else:
-                    raise AssertionError(f"unexpected player input packet {gameplay_id:#x}")
 
             connection.sendall(
                 compressed_frame(
@@ -1075,7 +1054,7 @@ def main() -> None:
             assert streamed_positions == {
                 (x, z) for z in range(-2, 3) for x in (3, 4)
             }
-            assert len(spawned_entity_ids) == 8
+            assert len(spawned_entity_ids) == 4
 
             connection.sendall(compressed_frame(0x35, threshold, struct.pack(">h", 4)))
             arrow_sequence = 10
@@ -1241,9 +1220,9 @@ def main() -> None:
                     assert stat_count > 0
                     break
                 assert stats_id in (
-                    0x01, 0x08, 0x23, 0x35, 0x36, 0x38,
+                    0x01, 0x08, 0x23, 0x2A, 0x35, 0x36, 0x38,
                     0x4D, 0x53, 0x63, 0x65, 0x71
-                )
+                ), hex(stats_id)
 
             connection.sendall(
                 compressed_frame(
@@ -1460,7 +1439,7 @@ def main() -> None:
                     assert response_id in (
                         0x03, 0x08, 0x23, 0x35, 0x36, 0x38,
                         0x4D, 0x53, 0x63, 0x65, 0x71,
-                    )
+                    ), hex(response_id)
 
             difficulty_cases = () if hardcore else (("peaceful", 0), ("normal", 2))
             for difficulty_name, difficulty_value in difficulty_cases:

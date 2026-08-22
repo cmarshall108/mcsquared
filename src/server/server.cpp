@@ -1360,7 +1360,8 @@ private:
             spawn_candidates(initial_player_position, 10.0), 15, false, 4);
         const auto monster_ids = natural_spawner.spawn_cycle(
             entities, entity::EntityCategory::monster,
-            spawn_candidates(initial_player_position, 18.0), 0,
+            spawn_candidates(initial_player_position, 18.0),
+            level.daylight() ? 15 : 0,
             difficulty == player::Difficulty::peaceful, 4);
         static_cast<void>(natural_spawner.spawn_cycle(
             entities, entity::EntityCategory::water_ambient,
@@ -1465,6 +1466,7 @@ private:
         std::optional<entity::EntityId> player_vehicle;
         bool entities_visible = false;
         std::map<entity::EntityId, std::uint16_t> experience_orbs;
+        std::set<entity::EntityId> daylight_burning;
         std::int32_t total_experience = 0;
         std::map<entity::EntityId, entity::Vec3> aquatic_positions;
         std::map<entity::EntityId, std::uint32_t> player_attack_cooldowns;
@@ -1842,6 +1844,38 @@ private:
                 }
                 animals.tick(entities, 0.05);
                 const auto entities_before_tick = entities.ids();
+                if (simulation_ticks % 20 == 0) {
+                    for (const auto id : entities_before_tick) {
+                        auto* living = dynamic_cast<entity::LivingEntity*>(entities.find(id));
+                        if (!living) continue;
+                        const auto exposed = entity::daylight_exposed(*living, level);
+                        const auto was_burning = daylight_burning.contains(id);
+                        if (exposed) daylight_burning.insert(id);
+                        else daylight_burning.erase(id);
+                        if (exposed != was_burning && entities_visible &&
+                            entity_tracker.visible(id)) {
+                            const std::array metadata{
+                                protocol::play::EntityMetadataEntry{
+                                    0, static_cast<std::uint8_t>(exposed ? 0x01 : 0x00)}};
+                            write_compressed_packet(
+                                descriptor,
+                                protocol::play::encode_entity_metadata(
+                                    static_cast<std::int32_t>(id), metadata),
+                                compression_threshold, cipher ? &*cipher : nullptr);
+                        }
+                        if (exposed && entity::apply_daylight_burn(*living, level) &&
+                            entities_visible && entity_tracker.visible(id)) {
+                            write_compressed_packet(
+                                descriptor,
+                                protocol::play::encode_hurt_animation(
+                                    static_cast<std::int32_t>(id), 0.0F),
+                                compression_threshold, cipher ? &*cipher : nullptr);
+                        }
+                    }
+                    std::erase_if(daylight_burning, [&](const auto id) {
+                        return entities.find(id) == nullptr;
+                    });
+                }
                 entities.tick(0.05);
                 for (const auto& impact : projectiles.tick(entities, level)) {
                     if (impact.recovery) {
@@ -2085,7 +2119,8 @@ private:
                         const auto candidates = spawn_candidates(player_position, 20.0);
                         auto spawned = natural_spawner.spawn_cycle(
                             entities, entity::EntityCategory::monster,
-                            candidates, 0, difficulty == player::Difficulty::peaceful, 2);
+                            candidates, level.daylight() ? 15 : 0,
+                            difficulty == player::Difficulty::peaceful, 2);
                         const auto passive_spawned = natural_spawner.spawn_cycle(
                             entities, entity::EntityCategory::creature,
                             candidates, 15, false, 2);
@@ -3434,11 +3469,7 @@ private:
             } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::swing)) {
                 protocol::Reader swing_reader(packet);
-                const auto hand = protocol::play::decode_swing(swing_reader);
-                write_compressed_packet(
-                    descriptor,
-                    protocol::play::encode_animate(1, hand == 0 ? 0 : 3),
-                    compression_threshold, cipher ? &*cipher : nullptr);
+                static_cast<void>(protocol::play::decode_swing(swing_reader));
             } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::use_item_on)) {
                 protocol::Reader use_reader(packet);

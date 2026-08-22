@@ -141,6 +141,12 @@ void test_world_time() {
     world.tick_time(20);
     assert(world.game_time() == 120);
     assert(world.day_time() == 6'020);
+    assert(world.daylight());
+    world.set_day_time(13'000);
+    assert(!world.daylight());
+    world.set_day_time(23'000);
+    assert(world.daylight());
+    world.set_day_time(6'020);
     world.set_advance_time(false);
     world.tick_time(5);
     assert(world.game_time() == 125);
@@ -206,6 +212,8 @@ void test_world_collision_and_line_of_sight() {
     const auto surface = world.surface_height(0, 0);
     const auto obstacle_y = surface + 10;
     world.set_block({0, obstacle_y, 0}, mc::world::BlockId::stone);
+    assert(world.sky_exposed({1.5, static_cast<double>(obstacle_y) + 0.5, 0.5}));
+    assert(!world.sky_exposed({0.5, static_cast<double>(obstacle_y) - 0.5, 0.5}));
     assert(world.solid({0, obstacle_y, 0}));
     assert(!world.solid({1, obstacle_y, 0}));
     assert(world.collides(

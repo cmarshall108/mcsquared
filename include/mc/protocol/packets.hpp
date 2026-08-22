@@ -498,7 +498,7 @@ struct SeenAdvancements final {
 };
 
 using EntityMetadataValue = std::variant<
-	bool, std::int32_t, float, std::string, SimpleItemStack>;
+	std::uint8_t, bool, std::int32_t, float, std::string, SimpleItemStack>;
 
 struct EntityMetadataEntry final {
 	std::uint8_t index;

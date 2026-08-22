@@ -23,6 +23,14 @@ mc::entity::EntityTypeRegistry loaded_registry() {
     return registry;
 }
 
+mc::item::ItemRegistry loaded_item_registry() {
+    mc::item::ItemRegistry registry;
+    std::ifstream input(MC_RUNTIME_REGISTRIES_PATH);
+    assert(input);
+    static_cast<void>(registry.load_normalized(input));
+    return registry;
+}
+
 void test_entity_registry() {
     const auto registry = loaded_registry();
     assert(registry.by_protocol_id(0).name().to_string() == "minecraft:acacia_boat");
@@ -272,6 +280,18 @@ void test_spawning_and_default_ai() {
     assert(entities.count(mc::entity::EntityCategory::monster) == 3);
     assert(spawner.spawn_cycle(
         entities, mc::entity::EntityCategory::monster, candidates, 0, true, 3).empty());
+    auto& zombie = dynamic_cast<mc::entity::LivingEntity&>(
+        entities.spawn("zombie", {210.0, 0.0, 200.0}));
+    assert(mc::entity::burns_in_daylight(zombie));
+    const auto item_registry = loaded_item_registry();
+    zombie.equip(
+        mc::entity::LivingEntity::EquipmentSlot::head,
+        mc::item::ItemStack(item_registry.by_name("iron_helmet").id(), 1),
+        item_registry);
+    assert(!mc::entity::burns_in_daylight(zombie));
+    const auto& creeper = dynamic_cast<mc::entity::LivingEntity&>(
+        entities.spawn("creeper", {212.0, 0.0, 200.0}));
+    assert(!mc::entity::burns_in_daylight(creeper));
 
     auto& cow = entities.spawn("cow", {201.0, 0.0, 200.0});
     mc::entity::MobAiSystem ai(entities, 44);
@@ -282,8 +302,35 @@ void test_spawning_and_default_ai() {
     ai.tick(0.05);
     assert(dynamic_cast<mc::entity::LivingEntity&>(cow).health() < health);
 
-    assert(spawner.despawn_distant(entities, {{0.0, 0.0, 0.0}}) == 3);
+    assert(spawner.despawn_distant(entities, {{0.0, 0.0, 0.0}}) == 5);
     assert(entities.find(cow.id()) != nullptr);
+}
+
+void test_daylight_burning() {
+    const auto registry = loaded_registry();
+    mc::entity::EntityManager entities(registry, 92);
+    mc::world::World world({{9'292, 63}, 4, std::nullopt});
+    const auto surface = world.surface_height(0, 0);
+
+    auto& exposed = dynamic_cast<mc::entity::LivingEntity&>(
+        entities.spawn("zombie", {0.5, static_cast<double>(surface + 1), 0.5}));
+    world.set_day_time(1'000);
+    const auto exposed_health = exposed.health();
+    assert(mc::entity::apply_daylight_burn(exposed, world));
+    assert(exposed.health() == exposed_health - 1.0F);
+
+    auto& night = dynamic_cast<mc::entity::LivingEntity&>(
+        entities.spawn("zombie", {1.5, static_cast<double>(surface + 1), 0.5}));
+    world.set_day_time(13'000);
+    assert(!mc::entity::apply_daylight_burn(night, world));
+    assert(night.health() == night.max_health());
+
+    auto& shaded = dynamic_cast<mc::entity::LivingEntity&>(
+        entities.spawn("zombie", {2.5, static_cast<double>(surface + 1), 0.5}));
+    world.set_block({2, surface + 3, 0}, mc::world::BlockId::stone);
+    world.set_day_time(1'000);
+    assert(!mc::entity::apply_daylight_burn(shaded, world));
+    assert(shaded.health() == shaded.max_health());
 }
 
 void test_biome_and_habitat_spawning() {
@@ -609,6 +656,7 @@ int main() {
     test_damage_context_and_invulnerability();
     test_armor_mitigation();
     test_spawning_and_default_ai();
+    test_daylight_burning();
     test_biome_and_habitat_spawning();
     test_animal_breeding_and_taming();
     test_entity_relationships();

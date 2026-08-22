@@ -7,6 +7,10 @@
 #include <cstdint>
 #include <vector>
 
+namespace mc::world {
+class World;
+}
+
 namespace mc::entity {
 
 enum class SpawnHabitat {
@@ -21,6 +25,10 @@ struct SpawnCandidate final {
     world::BiomeId biome;
     SpawnHabitat habitat;
 };
+
+[[nodiscard]] bool burns_in_daylight(const LivingEntity& entity) noexcept;
+[[nodiscard]] bool daylight_exposed(const LivingEntity& entity, world::World& world);
+[[nodiscard]] bool apply_daylight_burn(LivingEntity& entity, world::World& world);
 
 class NaturalSpawner final {
 public:

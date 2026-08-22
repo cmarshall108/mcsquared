@@ -444,6 +444,10 @@ void World::tick_time(const std::uint64_t ticks) noexcept {
 
 std::uint64_t World::game_time() const noexcept { return game_time_; }
 std::uint64_t World::day_time() const noexcept { return day_time_; }
+bool World::daylight() const noexcept {
+    const auto time = day_time_ % 24'000U;
+    return time < 12'000U || time >= 23'000U;
+}
 void World::set_day_time(const std::uint64_t day_time) noexcept { day_time_ = day_time; }
 void World::set_advance_time(const bool advance) noexcept { advance_time_ = advance; }
 
@@ -553,6 +557,17 @@ bool World::inside_border(const WorldPoint point, const double margin) const noe
     return radius >= 0.0 && point.x >= border_.center_x - radius &&
         point.x <= border_.center_x + radius &&
         point.z >= border_.center_z - radius && point.z <= border_.center_z + radius;
+}
+
+bool World::sky_exposed(const WorldPoint point) {
+    if (!std::isfinite(point.x) || !std::isfinite(point.y) || !std::isfinite(point.z) ||
+        point.y < min_build_y || point.y >= max_build_y) {
+        return false;
+    }
+    const auto x = static_cast<std::int32_t>(std::floor(point.x));
+    const auto y = static_cast<std::int32_t>(std::floor(point.y));
+    const auto z = static_cast<std::int32_t>(std::floor(point.z));
+    return y > surface_height(x, z);
 }
 
 std::uint8_t World::difficulty() const noexcept { return difficulty_; }

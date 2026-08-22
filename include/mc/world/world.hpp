@@ -97,6 +97,7 @@ public:
 	void tick_time(std::uint64_t ticks = 1) noexcept;
 	[[nodiscard]] std::uint64_t game_time() const noexcept;
 	[[nodiscard]] std::uint64_t day_time() const noexcept;
+	[[nodiscard]] bool daylight() const noexcept;
 	void set_day_time(std::uint64_t day_time) noexcept;
 	void set_advance_time(bool advance) noexcept;
 	[[nodiscard]] WeatherUpdate tick_weather(std::uint32_t ticks = 1) noexcept;
@@ -113,6 +114,7 @@ public:
 	void set_border_warning_distance(std::int32_t blocks);
 	void set_border_warning_time(std::int32_t seconds);
 	[[nodiscard]] bool inside_border(WorldPoint point, double margin = 0.0) const noexcept;
+	[[nodiscard]] bool sky_exposed(WorldPoint point);
 	[[nodiscard]] std::uint8_t difficulty() const noexcept;
 	void set_difficulty(std::uint8_t difficulty);
 	[[nodiscard]] bool has_persisted_state() const noexcept;

@@ -863,6 +863,7 @@ void test_play_streaming_packets() {
     assert(!beacon.secondary);
 
     const std::array metadata_entries{
+        mc::protocol::play::EntityMetadataEntry{4, std::uint8_t{0x01}},
         mc::protocol::play::EntityMetadataEntry{0, true},
         mc::protocol::play::EntityMetadataEntry{1, std::int32_t{42}},
         mc::protocol::play::EntityMetadataEntry{2, 1.5F},
@@ -873,6 +874,9 @@ void test_play_streaming_packets() {
     Reader metadata(metadata_body);
     assert(metadata.read_varint() == 0x63);
     assert(metadata.read_varint() == 7);
+    assert(metadata.read_u8() == 4);
+    assert(metadata.read_varint() == 0);
+    assert(metadata.read_u8() == 0x01);
     assert(metadata.read_u8() == 0);
     assert(metadata.read_varint() == 8);
     assert(metadata.read_bool());

@@ -2601,7 +2601,10 @@ Bytes encode_entity_metadata(const std::int32_t entity_id,
         payload.push_back(entry.index);
         std::visit([&payload](const auto& value) {
             using Value = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<Value, bool>) {
+            if constexpr (std::is_same_v<Value, std::uint8_t>) {
+                write_varint(payload, 0);
+                write_u8(payload, value);
+            } else if constexpr (std::is_same_v<Value, bool>) {
                 write_varint(payload, 8);
                 write_bool(payload, value);
             } else if constexpr (std::is_same_v<Value, std::int32_t>) {

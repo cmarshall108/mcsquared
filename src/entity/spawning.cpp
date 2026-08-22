@@ -1,4 +1,5 @@
 #include "mc/entity/spawning.hpp"
+#include "mc/world/world.hpp"
 
 #include <algorithm>
 #include <limits>
@@ -82,6 +83,28 @@ struct SpawnRule final {
 }
 
 } // namespace
+
+bool burns_in_daylight(const LivingEntity& entity) noexcept {
+    if (!entity.equipment(LivingEntity::EquipmentSlot::head).empty()) {
+        return false;
+    }
+    const auto& name = entity.type().name().path();
+    return name == "zombie" || name == "zombie_villager" || name == "skeleton" ||
+        name == "stray" || name == "bogged" || name == "drowned" ||
+        name == "phantom";
+}
+
+bool daylight_exposed(const LivingEntity& entity, world::World& world) {
+    const auto position = entity.position();
+    return world.daylight() && burns_in_daylight(entity) &&
+        world.sky_exposed({
+            position.x, position.y + entity.type().properties().height, position.z});
+}
+
+bool apply_daylight_burn(LivingEntity& entity, world::World& world) {
+    return daylight_exposed(entity, world) &&
+        entity.damage(1.0F, {DamageType::fire, std::nullopt, false, true});
+}
 
 NaturalSpawner::NaturalSpawner(const EntityTypeRegistry& registry, const std::uint64_t seed)
     : registry_(&registry), seed_(seed) {}

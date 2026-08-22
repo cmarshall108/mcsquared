@@ -200,6 +200,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement poison, wither, and regeneration active-effect ticking and expiry
 - [x] Implement speed and slowness movement modifiers across mob goals
 - [x] Implement fire-resistance immunity for typed fire damage
+- [x] Ignite and damage sun-sensitive undead in exposed daylight with shade, darkness, and headgear protection
 - [x] Implement bounded knockback-resistance attribute scaling
 - [x] Implement mob death experience rewards, orb entities, proximity pickup, and player level synchronization
 - [ ] Implement typed damage sources, invulnerability, knockback, armor, shields, enchantments, drops, and experience
@@ -211,6 +212,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [ ] Implement full node types, sensing, schedules, look controls, and species-specific brains
 - [x] Implement same-species proximity sensing for passive flock and aquatic school leaders
 - [x] Implement official category caps/distances, deterministic candidate spawning, peaceful/light gates, and distance despawning
+- [x] Gate live surface hostile spawning to nighttime darkness
 - [x] Wire recurring natural animal/monster spawning, AI ticks, terrain grounding, attacks, movement, and despawning into Play
 - [x] Implement deterministic biome/habitat-weighted land, hostile, and aquatic spawn tables and live selection
 - [ ] Implement eligible chunk, biome, structure, pack, patrol, and phantom spawning rules
