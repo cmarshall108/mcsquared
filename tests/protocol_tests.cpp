@@ -1026,6 +1026,17 @@ void test_play_streaming_packets() {
     } catch (const mc::protocol::DecodeError&) {
     }
 
+    Bytes empty_chat_ack{0x06, 0x00};
+    Reader empty_chat_ack_reader(empty_chat_ack);
+    mc::protocol::play::decode_empty_chat_ack(empty_chat_ack_reader);
+    try {
+        Bytes invalid_chat_ack{0x06, 0x01};
+        Reader invalid_chat_ack_reader(invalid_chat_ack);
+        mc::protocol::play::decode_empty_chat_ack(invalid_chat_ack_reader);
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

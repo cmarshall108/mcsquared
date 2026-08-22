@@ -93,6 +93,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement bounded global block-state and biome palette fallback encoding
 - [x] Implement heightmap-derived skylight arrays and incremental light updates after block changes
 - [ ] Implement signed chat, message acknowledgement, filtering, reporting metadata, and secure-chat enforcement
+- [x] Decode zero-offset acknowledgements for the empty signed-chat chain and reject nonexistent offsets
 - [ ] Fuzz every decoder and verify malformed input cannot exhaust memory or stall workers
 
 ## Phase 3: World and chunk system

@@ -2311,6 +2311,10 @@ private:
                         compression_threshold, cipher ? &*cipher : nullptr);
                 }
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::chat_ack)) {
+                protocol::Reader acknowledgement_reader(packet);
+                protocol::play::decode_empty_chat_ack(acknowledgement_reader);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::chat_command)) {
                 protocol::Reader command_reader(packet);
                 const auto command = protocol::play::decode_chat_command(command_reader);

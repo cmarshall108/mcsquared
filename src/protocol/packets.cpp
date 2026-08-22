@@ -2050,6 +2050,16 @@ std::uint8_t decode_change_game_mode(Reader& packet) {
     return static_cast<std::uint8_t>(game_mode);
 }
 
+void decode_empty_chat_ack(Reader& packet) {
+    if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_ack)) {
+        throw DecodeError("expected chat acknowledgement packet");
+    }
+    if (packet.read_varint() != 0) {
+        throw DecodeError("chat acknowledgement references an absent message chain");
+    }
+    expect_packet_end(packet);
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");

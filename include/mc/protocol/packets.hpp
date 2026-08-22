@@ -255,6 +255,7 @@ enum class ServerboundPacketId : std::int32_t {
 	bundle_item_selected = 0x03,
 	change_difficulty = 0x04,
 	change_game_mode = 0x05,
+	chat_ack = 0x06,
 	chat_command = 0x07,
 	chunk_batch_received = 0x0B,
 	client_command = 0x0C,
@@ -685,6 +686,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] BundleItemSelection decode_bundle_item_selection(Reader& packet);
 [[nodiscard]] std::uint8_t decode_change_difficulty(Reader& packet);
 [[nodiscard]] std::uint8_t decode_change_game_mode(Reader& packet);
+void decode_empty_chat_ack(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
 [[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);
