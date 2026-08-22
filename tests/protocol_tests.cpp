@@ -869,6 +869,17 @@ void test_play_streaming_packets() {
         mc::protocol::play::EntityMetadataEntry{1, std::int32_t{42}},
         mc::protocol::play::EntityMetadataEntry{2, 1.5F},
         mc::protocol::play::EntityMetadataEntry{3, std::string("value")},
+        mc::protocol::play::EntityMetadataEntry{5, std::int64_t{300}},
+        mc::protocol::play::EntityMetadataEntry{
+            6, mc::protocol::play::MetadataRotations{1.0F, 2.0F, 3.0F}},
+        mc::protocol::play::EntityMetadataEntry{
+            7, mc::protocol::BlockPosition{1, 64, -2}},
+        mc::protocol::play::EntityMetadataEntry{
+            8, mc::protocol::play::MetadataBlockState{137}},
+        mc::protocol::play::EntityMetadataEntry{
+            9, mc::protocol::play::MetadataOptionalUnsignedInt{42}},
+        mc::protocol::play::EntityMetadataEntry{
+            10, mc::protocol::play::MetadataPose{5}},
     };
     const auto metadata_body = packet_body(
         mc::protocol::play::encode_entity_metadata(7, metadata_entries));
@@ -890,6 +901,26 @@ void test_play_streaming_packets() {
     assert(metadata.read_u8() == 3);
     assert(metadata.read_varint() == 4);
     assert(metadata.read_string(32'767) == "value");
+    assert(metadata.read_u8() == 5);
+    assert(metadata.read_varint() == 2);
+    assert(metadata.read_varlong() == 300);
+    assert(metadata.read_u8() == 6);
+    assert(metadata.read_varint() == 9);
+    assert(metadata.read_f32_be() == 1.0F);
+    assert(metadata.read_f32_be() == 2.0F);
+    assert(metadata.read_f32_be() == 3.0F);
+    assert(metadata.read_u8() == 7);
+    assert(metadata.read_varint() == 10);
+    assert(metadata.read_position() == mc::protocol::BlockPosition(1, 64, -2));
+    assert(metadata.read_u8() == 8);
+    assert(metadata.read_varint() == 14);
+    assert(metadata.read_varint() == 137);
+    assert(metadata.read_u8() == 9);
+    assert(metadata.read_varint() == 19);
+    assert(metadata.read_varint() == 43);
+    assert(metadata.read_u8() == 10);
+    assert(metadata.read_varint() == 20);
+    assert(metadata.read_varint() == 5);
     assert(metadata.read_u8() == 0xFFU);
     assert(metadata.empty());
 
@@ -916,6 +947,14 @@ void test_play_streaming_packets() {
             mc::protocol::play::EntityMetadataEntry{1, false},
         };
         static_cast<void>(mc::protocol::play::encode_entity_metadata(7, duplicates));
+        assert(false);
+    } catch (const std::invalid_argument&) {
+    }
+    try {
+        static_cast<void>(mc::protocol::play::encode_entity_metadata(
+            7, std::array<mc::protocol::play::EntityMetadataEntry, 1>{
+                mc::protocol::play::EntityMetadataEntry{
+                    1, mc::protocol::play::MetadataPose{18}}}));
         assert(false);
     } catch (const std::invalid_argument&) {
     }

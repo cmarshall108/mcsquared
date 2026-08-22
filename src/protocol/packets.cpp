@@ -2610,6 +2610,9 @@ Bytes encode_entity_metadata(const std::int32_t entity_id,
             } else if constexpr (std::is_same_v<Value, std::int32_t>) {
                 write_varint(payload, 1);
                 write_varint(payload, value);
+            } else if constexpr (std::is_same_v<Value, std::int64_t>) {
+                write_varint(payload, 2);
+                write_varlong(payload, value);
             } else if constexpr (std::is_same_v<Value, float>) {
                 if (!std::isfinite(value)) {
                     throw std::invalid_argument("entity metadata float is non-finite");
@@ -2622,9 +2625,42 @@ Bytes encode_entity_metadata(const std::int32_t entity_id,
                 }
                 write_varint(payload, 4);
                 write_string(payload, value);
-            } else {
+            } else if constexpr (std::is_same_v<Value, SimpleItemStack>) {
                 write_varint(payload, 7);
                 write_simple_item_stack(payload, value);
+            } else if constexpr (std::is_same_v<Value, MetadataRotations>) {
+                if (!std::isfinite(value.x) || !std::isfinite(value.y) ||
+                    !std::isfinite(value.z)) {
+                    throw std::invalid_argument("entity metadata rotations are non-finite");
+                }
+                write_varint(payload, 9);
+                write_f32_be(payload, value.x);
+                write_f32_be(payload, value.y);
+                write_f32_be(payload, value.z);
+            } else if constexpr (std::is_same_v<Value, BlockPosition>) {
+                write_varint(payload, 10);
+                write_position(payload, value);
+            } else if constexpr (std::is_same_v<Value, MetadataBlockState>) {
+                if (value.id < 0 || value.id > 32'365) {
+                    throw std::invalid_argument("entity metadata block state is invalid");
+                }
+                write_varint(payload, 14);
+                write_varint(payload, value.id);
+            } else if constexpr (
+                std::is_same_v<Value, MetadataOptionalUnsignedInt>) {
+                if (value.value && (*value.value < 0 ||
+                    *value.value == std::numeric_limits<std::int32_t>::max())) {
+                    throw std::invalid_argument(
+                        "entity metadata optional integer is invalid");
+                }
+                write_varint(payload, 19);
+                write_varint(payload, value.value ? *value.value + 1 : 0);
+            } else {
+                if (value.id > 17) {
+                    throw std::invalid_argument("entity metadata pose is invalid");
+                }
+                write_varint(payload, 20);
+                write_varint(payload, value.id);
             }
         }, entry.value);
     }

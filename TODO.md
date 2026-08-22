@@ -63,6 +63,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [ ] Implement remaining Play metadata, particles, advancements, signed chat, complex inventory, and debug/test packet families
 - [x] Implement Play attribute snapshots/modifiers, mob-effect updates/removals, and beacon effect selection
 - [x] Implement Play entity metadata for bool, VarInt, float, and string serializers used by the entity model
+- [x] Implement Play byte, VarLong, rotations, block-position, block-state, optional-unsigned-int, and pose metadata serializers
 - [x] Implement component-free ItemStack entity metadata serializer for dropped items
 - [x] Implement Play recipe-book removal/settings and place/settings/seen interaction packets
 - [x] Implement Play level-particle framing with bounded registry-dispatched option payloads

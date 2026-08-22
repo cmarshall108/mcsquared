@@ -498,8 +498,28 @@ struct SeenAdvancements final {
 	std::optional<std::string> tab;
 };
 
+struct MetadataRotations final {
+	float x;
+	float y;
+	float z;
+};
+
+struct MetadataBlockState final {
+	std::int32_t id;
+};
+
+struct MetadataOptionalUnsignedInt final {
+	std::optional<std::int32_t> value;
+};
+
+struct MetadataPose final {
+	std::uint8_t id;
+};
+
 using EntityMetadataValue = std::variant<
-	std::uint8_t, bool, std::int32_t, float, std::string, SimpleItemStack>;
+	std::uint8_t, bool, std::int32_t, std::int64_t, float, std::string,
+	SimpleItemStack, MetadataRotations, BlockPosition, MetadataBlockState,
+	MetadataOptionalUnsignedInt, MetadataPose>;
 
 struct EntityMetadataEntry final {
 	std::uint8_t index;
