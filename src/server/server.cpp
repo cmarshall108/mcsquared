@@ -2865,6 +2865,15 @@ private:
                     stream_chunk_window(player_center);
                 }
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::block_entity_tag_query)) {
+                protocol::Reader query_reader(packet);
+                const auto query =
+                    protocol::play::decode_block_entity_tag_query(query_reader);
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_tag_query(query.transaction_id),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::attack)) {
                 protocol::Reader attack_reader(packet);
                 const auto target_id = protocol::play::decode_attack(attack_reader);

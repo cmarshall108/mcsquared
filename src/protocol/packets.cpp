@@ -1984,6 +1984,19 @@ std::int32_t decode_attack(Reader& packet) {
     return entity_id;
 }
 
+BlockEntityTagQuery decode_block_entity_tag_query(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::block_entity_tag_query)) {
+        throw DecodeError("expected block entity tag query packet");
+    }
+    BlockEntityTagQuery query{packet.read_varint(), packet.read_position()};
+    if (query.transaction_id < 0) {
+        throw DecodeError("block entity query transaction is invalid");
+    }
+    expect_packet_end(packet);
+    return query;
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");
@@ -2811,6 +2824,31 @@ Bytes encode_command_tree(const std::span<const std::string_view> roots) {
     }
     write_varint(payload, 0);
     return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::commands), payload);
+}
+
+Bytes encode_tag_query(const std::int32_t transaction_id,
+                       std::optional<nbt::Tag> tag) {
+    if (transaction_id < 0 || (tag && tag->type != nbt::Type::compound)) {
+        throw std::invalid_argument("tag query response is invalid");
+    }
+    Bytes payload;
+    write_varint(payload, transaction_id);
+    nbt::write_any_tag(payload, tag ? *tag : nbt::Tag{});
+    return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::tag_query), payload);
+}
+
+Bytes encode_block_entity_data(const BlockPosition position,
+                               const std::int32_t type_id,
+                               const nbt::Tag& compound) {
+    if (type_id < 0 || compound.type != nbt::Type::compound) {
+        throw std::invalid_argument("block entity data is invalid");
+    }
+    Bytes payload;
+    write_position(payload, position);
+    write_varint(payload, type_id);
+    nbt::write_any_tag(payload, compound);
+    return frame_packet(
+        static_cast<std::int32_t>(ClientboundPacketId::block_entity_data), payload);
 }
 
 Bytes encode_level_chunks_load_start() {

@@ -251,6 +251,7 @@ namespace play {
 enum class ServerboundPacketId : std::int32_t {
 	accept_teleportation = 0x00,
 	attack = 0x01,
+	block_entity_tag_query = 0x02,
 	chat_command = 0x07,
 	chunk_batch_received = 0x0B,
 	client_command = 0x0C,
@@ -296,6 +297,7 @@ enum class ClientboundPacketId : std::int32_t {
 	add_entity = 0x01,
 	animate = 0x02,
 	award_stats = 0x03,
+	block_entity_data = 0x06,
 	block_changed_ack = 0x04,
 	block_destruction = 0x05,
 	block_event = 0x07,
@@ -381,6 +383,7 @@ enum class ClientboundPacketId : std::int32_t {
 	stop_sound = 0x77,
 	system_chat = 0x79,
 	tab_list = 0x7A,
+	tag_query = 0x7B,
 	take_item_entity = 0x7C,
 	ticking_state = 0x7F,
 	ticking_step = 0x80,
@@ -425,6 +428,11 @@ struct CreativeSlotChange final {
 struct CommandSuggestionRequest final {
 	std::int32_t id;
 	std::string command;
+};
+
+struct BlockEntityTagQuery final {
+	std::int32_t transaction_id;
+	BlockPosition position;
 };
 
 enum class ContainerInput : std::uint8_t {
@@ -658,6 +666,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] Bytes encode_keep_alive(std::int64_t id);
 [[nodiscard]] std::int64_t decode_keep_alive(Reader& packet);
 [[nodiscard]] std::int32_t decode_attack(Reader& packet);
+[[nodiscard]] BlockEntityTagQuery decode_block_entity_tag_query(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
 [[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);
@@ -921,6 +930,11 @@ void decode_player_loaded(Reader& packet);
 											 std::int32_t length,
 											 std::span<const std::string> suggestions);
 [[nodiscard]] Bytes encode_command_tree(std::span<const std::string_view> roots);
+[[nodiscard]] Bytes encode_tag_query(std::int32_t transaction_id,
+									 std::optional<nbt::Tag> tag = std::nullopt);
+[[nodiscard]] Bytes encode_block_entity_data(BlockPosition position,
+											std::int32_t type_id,
+											const nbt::Tag& compound);
 [[nodiscard]] Bytes encode_level_chunks_load_start();
 [[nodiscard]] Bytes encode_level_chunk(const world::Chunk& chunk);
 [[nodiscard]] Bytes encode_light_update(const world::Chunk& chunk);

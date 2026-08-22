@@ -963,6 +963,35 @@ void test_play_streaming_packets() {
     Reader attack_request_reader(attack_request);
     assert(mc::protocol::play::decode_attack(attack_request_reader) == 7);
 
+    Bytes block_entity_query{0x02, 0x07};
+    mc::protocol::write_position(block_entity_query, {1, 64, -2});
+    Reader block_entity_query_reader(block_entity_query);
+    const auto decoded_block_entity_query =
+        mc::protocol::play::decode_block_entity_tag_query(block_entity_query_reader);
+    assert(decoded_block_entity_query.transaction_id == 7);
+    assert(decoded_block_entity_query.position == mc::protocol::BlockPosition(1, 64, -2));
+
+    const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
+    const auto null_tag_body = packet_body(framed_null_tag);
+    Reader null_tag(null_tag_body);
+    assert(null_tag.read_varint() == 0x7B);
+    assert(null_tag.read_varint() == 7);
+    assert(null_tag.read_u8() == 0);
+    assert(null_tag.empty());
+
+    const mc::protocol::nbt::Tag empty_compound{
+        mc::protocol::nbt::Type::compound, mc::protocol::nbt::Compound{}};
+    const auto framed_block_entity =
+        mc::protocol::play::encode_block_entity_data({1, 64, -2}, 3, empty_compound);
+    const auto block_entity_body = packet_body(framed_block_entity);
+    Reader block_entity_data(block_entity_body);
+    assert(block_entity_data.read_varint() == 0x06);
+    assert(block_entity_data.read_position() == mc::protocol::BlockPosition(1, 64, -2));
+    assert(block_entity_data.read_varint() == 3);
+    const auto decoded_compound = mc::protocol::nbt::read_any_tag(block_entity_data);
+    assert(decoded_compound.type == mc::protocol::nbt::Type::compound);
+    assert(block_entity_data.empty());
+
         Bytes command_request{0x07};
         mc::protocol::write_string(command_request, "time set day");
         Reader command_request_reader(command_request);

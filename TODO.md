@@ -59,6 +59,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement Play login, keepalive, movement/status, teleport, chunk streaming, and prediction acknowledgement packets
 - [x] Implement Play player/world scalar state, HUD/title, border, common cookie/resource-pack/report/link, and game-rule packets
 - [x] Implement Play entity lifecycle, adaptive motion, relationships, attack/interact, and block/world update packets
+- [x] Implement bounded block-entity data framing and transaction-matched null tag queries
 - [x] Implement Play empty/component-free inventory, container UI/control, Player Info, scoreboard, team, and sound/effect packets
 - [ ] Implement remaining Play metadata, particles, advancements, signed chat, complex inventory, and debug/test packet families
 - [x] Implement Play attribute snapshots/modifiers, mob-effect updates/removals, and beacon effect selection
