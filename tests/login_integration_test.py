@@ -1062,6 +1062,35 @@ def main() -> None:
                     0x4D, 0x53, 0x63, 0x65, 0x71,
                 ), hex(difficulty_id)
 
+            connection.sendall(compressed_frame(0x05, threshold, encode_varint(3)))
+            corrected_mode_seen = False
+            corrected_abilities_seen = False
+            while not (corrected_mode_seen and corrected_abilities_seen):
+                mode_response = read_compressed_packet(connection, threshold)
+                mode_id, offset = read_varint(mode_response, 0)
+                if mode_id == 0x26:
+                    event = mode_response[offset]
+                    value = struct.unpack(">f", mode_response[offset + 1:offset + 5])[0]
+                    if event == 3:
+                        assert value == 0.0
+                        corrected_mode_seen = True
+                elif mode_id == 0x40:
+                    assert mode_response[offset] == 0
+                    corrected_abilities_seen = True
+                elif mode_id == 0x2C:
+                    keep_alive_id = struct.unpack(">q", mode_response[offset:offset + 8])[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                elif mode_id == 0x01:
+                    entity_id, _ = read_varint(mode_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                else:
+                    assert mode_id in (
+                        0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                        0x4D, 0x53, 0x63, 0x65, 0x71,
+                    ), hex(mode_id)
+
             break_start_sequence = 6
             break_sequence = 7
             break_position = (8, spawn_y - 1, 8)

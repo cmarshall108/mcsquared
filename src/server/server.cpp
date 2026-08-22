@@ -3166,6 +3166,24 @@ private:
                         static_cast<std::uint8_t>(difficulty), config_.hardcore),
                     compression_threshold, cipher ? &*cipher : nullptr);
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::change_game_mode)) {
+                protocol::Reader game_mode_reader(packet);
+                static_cast<void>(
+                    protocol::play::decode_change_game_mode(game_mode_reader));
+                const auto creative = game_mode == GameMode::creative;
+                const auto spectator = game_mode == GameMode::spectator;
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_game_event(
+                        3, static_cast<float>(game_mode)),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+                write_compressed_packet(
+                    descriptor,
+                    protocol::play::encode_player_abilities(
+                        creative || spectator, survival.flying(),
+                        creative || spectator, creative, 0.05F, 0.1F),
+                    compression_threshold, cipher ? &*cipher : nullptr);
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::container_close)) {
                 protocol::Reader close_reader(packet);
                 static_cast<void>(protocol::play::decode_container_close(close_reader));

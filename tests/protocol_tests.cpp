@@ -1014,6 +1014,18 @@ void test_play_streaming_packets() {
     } catch (const mc::protocol::DecodeError&) {
     }
 
+    Bytes game_mode_change{0x05, 0x03};
+    Reader game_mode_change_reader(game_mode_change);
+    assert(mc::protocol::play::decode_change_game_mode(game_mode_change_reader) == 3);
+    try {
+        Bytes invalid_game_mode_change{0x05, 0x04};
+        Reader invalid_game_mode_change_reader(invalid_game_mode_change);
+        static_cast<void>(mc::protocol::play::decode_change_game_mode(
+            invalid_game_mode_change_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

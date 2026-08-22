@@ -2037,6 +2037,19 @@ std::uint8_t decode_change_difficulty(Reader& packet) {
     return static_cast<std::uint8_t>(difficulty);
 }
 
+std::uint8_t decode_change_game_mode(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::change_game_mode)) {
+        throw DecodeError("expected game-mode change packet");
+    }
+    const auto game_mode = packet.read_varint();
+    if (game_mode < 0 || game_mode > 3) {
+        throw DecodeError("game-mode change is out of bounds");
+    }
+    expect_packet_end(packet);
+    return static_cast<std::uint8_t>(game_mode);
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");
