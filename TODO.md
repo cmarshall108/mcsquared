@@ -85,6 +85,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [ ] Implement bounded NBT and registry-aware NBT codecs
 - [ ] Implement item-stack data components and patch codecs
 - [ ] Implement entity metadata, attributes, particles, sounds, recipes, statistics, advancements, and command-tree codecs
+- [x] Implement bounded executable-literal command trees synchronized at Play entry
 - [x] Implement single-value and local chunk section/biome palettes, packed storage, batch markers, populated heightmaps, block-entity lists, and light masks
 - [ ] Implement global palettes, populated block entities, and incremental light updates
 - [x] Implement bounded global block-state and biome palette fallback encoding

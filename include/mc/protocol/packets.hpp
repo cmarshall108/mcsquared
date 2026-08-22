@@ -304,6 +304,7 @@ enum class ClientboundPacketId : std::int32_t {
 	chunk_batch_finished = 0x0B,
 	chunk_batch_start = 0x0C,
 	command_suggestions = 0x0F,
+	commands = 0x10,
 	clear_titles = 0x0E,
 	container_close = 0x11,
 	container_set_content = 0x12,
@@ -919,6 +920,7 @@ void decode_player_loaded(Reader& packet);
 											 std::int32_t start,
 											 std::int32_t length,
 											 std::span<const std::string> suggestions);
+[[nodiscard]] Bytes encode_command_tree(std::span<const std::string_view> roots);
 [[nodiscard]] Bytes encode_level_chunks_load_start();
 [[nodiscard]] Bytes encode_level_chunk(const world::Chunk& chunk);
 [[nodiscard]] Bytes encode_light_update(const world::Chunk& chunk);

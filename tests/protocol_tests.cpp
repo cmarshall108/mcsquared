@@ -992,6 +992,24 @@ void test_play_streaming_packets() {
     assert(!suggestion_response.read_bool());
     assert(suggestion_response.empty());
 
+    constexpr std::array<std::string_view, 2> command_roots{"time", "say"};
+    const auto framed_tree = mc::protocol::play::encode_command_tree(command_roots);
+    const auto tree_body = packet_body(framed_tree);
+    Reader command_tree(tree_body);
+    assert(command_tree.read_varint() == 0x10);
+    assert(command_tree.read_varint() == 3);
+    assert(command_tree.read_u8() == 0);
+    assert(command_tree.read_varint() == 2);
+    assert(command_tree.read_varint() == 1);
+    assert(command_tree.read_varint() == 2);
+    for (const auto expected : {"say", "time"}) {
+        assert(command_tree.read_u8() == 0x05);
+        assert(command_tree.read_varint() == 0);
+        assert(command_tree.read_string(64) == expected);
+    }
+    assert(command_tree.read_varint() == 0);
+    assert(command_tree.empty());
+
     Reader encoded_motion(motion_body);
     assert(encoded_motion.read_varint() == 0x65);
     assert(encoded_motion.read_varint() == 7);

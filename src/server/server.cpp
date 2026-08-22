@@ -60,6 +60,10 @@ namespace {
 
 constexpr std::int32_t protocol_version = 776;
 constexpr std::size_t max_packet_size = 2U * 1024U * 1024U;
+constexpr std::array<std::string_view, 16> implemented_command_roots{
+    "clear", "difficulty", "effect", "experience", "gamemode", "gamerule",
+    "give", "kill", "say", "summon", "teleport", "time", "tp", "weather",
+    "worldborder", "xp"};
 
 #ifdef _WIN32
 using NativeSocket = SOCKET;
@@ -1125,6 +1129,11 @@ private:
             descriptor,
             protocol::play::encode_player_info_initialize(
                 profile, 0, true, 0, 0, true),
+            compression_threshold,
+            cipher ? &*cipher : nullptr);
+        write_compressed_packet(
+            descriptor,
+            protocol::play::encode_command_tree(implemented_command_roots),
             compression_threshold,
             cipher ? &*cipher : nullptr);
         for (const auto& recipe_packet : recipe_sync_packets_) {
@@ -3097,11 +3106,7 @@ private:
                 const auto prefix = std::string_view(request.command).substr(start);
                 std::vector<std::string> suggestions;
                 if (prefix.find(' ') == std::string_view::npos) {
-                    constexpr std::array<std::string_view, 16> command_roots{
-                        "clear", "difficulty", "effect", "experience", "gamemode",
-                        "gamerule", "give", "kill", "say", "summon", "teleport",
-                        "time", "tp", "weather", "worldborder", "xp"};
-                    for (const auto root : command_roots) {
+                    for (const auto root : implemented_command_roots) {
                         if (root.starts_with(prefix)) suggestions.emplace_back(root);
                     }
                 }

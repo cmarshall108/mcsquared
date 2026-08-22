@@ -1,6 +1,7 @@
 #include "mc/protocol/packets.hpp"
 
 #include <charconv>
+#include <cctype>
 #include <cmath>
 #include <limits>
 #include <map>
@@ -2776,6 +2777,40 @@ Bytes encode_command_suggestions(const std::int32_t id,
     }
     return frame_packet(
         static_cast<std::int32_t>(ClientboundPacketId::command_suggestions), payload);
+}
+
+Bytes encode_command_tree(const std::span<const std::string_view> roots) {
+    if (roots.empty() || roots.size() > 128) {
+        throw std::invalid_argument("command tree root count is invalid");
+    }
+    std::vector<std::string_view> sorted(roots.begin(), roots.end());
+    std::sort(sorted.begin(), sorted.end());
+    if (std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end()) {
+        throw std::invalid_argument("command tree contains duplicate roots");
+    }
+    for (const auto root : sorted) {
+        if (root.empty() || root.size() > 64 ||
+            !std::all_of(root.begin(), root.end(), [](const unsigned char value) {
+                return std::islower(value) != 0 || value == '_';
+            })) {
+            throw std::invalid_argument("command tree literal is invalid");
+        }
+    }
+
+    Bytes payload;
+    write_varint(payload, static_cast<std::int32_t>(sorted.size() + 1));
+    write_u8(payload, 0);
+    write_varint(payload, static_cast<std::int32_t>(sorted.size()));
+    for (std::size_t index = 0; index < sorted.size(); ++index) {
+        write_varint(payload, static_cast<std::int32_t>(index + 1));
+    }
+    for (const auto root : sorted) {
+        write_u8(payload, 0x05);
+        write_varint(payload, 0);
+        write_string(payload, root);
+    }
+    write_varint(payload, 0);
+    return frame_packet(static_cast<std::int32_t>(ClientboundPacketId::commands), payload);
 }
 
 Bytes encode_level_chunks_load_start() {

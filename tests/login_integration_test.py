@@ -610,6 +610,32 @@ def main() -> None:
                 0, 0, 1, 0, 0, 0, 1, len(player_info)
             )
 
+            commands = read_compressed_packet(connection, threshold)
+            packet_id, offset = read_varint(commands, 0)
+            node_count, offset = read_varint(commands, offset)
+            assert (packet_id, node_count) == (0x10, 17)
+            assert commands[offset] == 0
+            offset += 1
+            child_count, offset = read_varint(commands, offset)
+            children = []
+            for _ in range(child_count):
+                child, offset = read_varint(commands, offset)
+                children.append(child)
+            assert children == list(range(1, 17))
+            expected_roots = [
+                "clear", "difficulty", "effect", "experience", "gamemode",
+                "gamerule", "give", "kill", "say", "summon", "teleport",
+                "time", "tp", "weather", "worldborder", "xp",
+            ]
+            for expected_root in expected_roots:
+                assert commands[offset] == 0x05
+                offset += 1
+                literal_children, offset = read_varint(commands, offset)
+                literal, offset = read_string(commands, offset)
+                assert (literal_children, literal) == (0, expected_root)
+            root_index, offset = read_varint(commands, offset)
+            assert (root_index, offset) == (0, len(commands))
+
             recipe_book_add = read_compressed_packet(connection, threshold)
             assert recipe_book_add == b"\x4a\x00\x01"
             update_recipes = read_compressed_packet(connection, threshold)
