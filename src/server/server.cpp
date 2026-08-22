@@ -3130,6 +3130,11 @@ private:
                 protocol::Reader payload_reader(packet);
                 static_cast<void>(protocol::play::decode_custom_payload(payload_reader));
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::custom_click_action)) {
+                protocol::Reader click_reader(packet);
+                static_cast<void>(
+                    protocol::play::decode_custom_click_action(click_reader));
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::command_suggestion)) {
                 protocol::Reader suggestion_reader(packet);
                 const auto request =

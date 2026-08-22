@@ -298,6 +298,7 @@ enum class ServerboundPacketId : std::int32_t {
 	swing = 0x3F,
 	use_item_on = 0x42,
 	use_item = 0x43,
+	custom_click_action = 0x44,
 };
 
 enum class ClientboundPacketId : std::int32_t {
@@ -709,6 +710,7 @@ void decode_empty_chat_ack(Reader& packet);
 void decode_client_tick_end(Reader& packet);
 [[nodiscard]] configuration::ClientInformation decode_client_information(Reader& packet);
 [[nodiscard]] configuration::CustomPayload decode_custom_payload(Reader& packet);
+[[nodiscard]] configuration::CustomClickAction decode_custom_click_action(Reader& packet);
 void decode_configuration_acknowledged(Reader& packet);
 [[nodiscard]] CookieResponse decode_cookie_response(Reader& packet);
 void decode_player_loaded(Reader& packet);

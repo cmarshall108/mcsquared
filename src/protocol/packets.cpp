@@ -362,11 +362,7 @@ ResourcePackResponse decode_resource_pack_response(Reader& packet) {
     return response;
 }
 
-CustomClickAction decode_custom_click_action(Reader& packet) {
-    if (packet.read_varint() !=
-        static_cast<std::int32_t>(ServerboundPacketId::custom_click_action)) {
-        throw DecodeError("expected Configuration custom click action");
-    }
+CustomClickAction decode_custom_click_action_payload(Reader& packet) {
     CustomClickAction action{packet.read_identifier(), std::nullopt};
     const auto encoded = packet.read_byte_array(65'536);
     Reader tag_reader(encoded);
@@ -382,6 +378,14 @@ CustomClickAction decode_custom_click_action(Reader& packet) {
     }
     expect_packet_end(packet);
     return action;
+}
+
+CustomClickAction decode_custom_click_action(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::custom_click_action)) {
+        throw DecodeError("expected Configuration custom click action");
+    }
+    return decode_custom_click_action_payload(packet);
 }
 
 Bytes encode_store_cookie(const std::string_view key,
@@ -1067,6 +1071,14 @@ configuration::CustomPayload decode_custom_payload(Reader& packet) {
         throw DecodeError("expected Play custom payload packet");
     }
     return configuration::decode_custom_payload_payload(packet);
+}
+
+configuration::CustomClickAction decode_custom_click_action(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::custom_click_action)) {
+        throw DecodeError("expected Play custom click action packet");
+    }
+    return configuration::decode_custom_click_action_payload(packet);
 }
 
 void decode_configuration_acknowledged(Reader& packet) {

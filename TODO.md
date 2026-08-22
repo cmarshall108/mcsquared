@@ -55,6 +55,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement all serverbound and clientbound Configuration packets and legal transitions
 - [x] Decode bounded client-information updates in both Configuration and Play states
 - [x] Decode bounded custom payloads in both Configuration and Play states
+- [x] Decode bounded optional-NBT custom click actions in both Configuration and Play states
 - [x] Synchronize known packs, enabled features, 29 core-pack registries, and all 704 network-safe tags from 801 verified definitions
 - [x] Synchronize registry fallback data, resource packs, and recipe displays
 - [ ] Implement all serverbound and clientbound Play packets

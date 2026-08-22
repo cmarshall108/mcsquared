@@ -1767,6 +1767,14 @@ void test_configuration_packets() {
     assert(empty_click.id == "mcsquared:action");
     assert(!empty_click.payload);
 
+    auto play_click_without_payload = click_without_payload;
+    play_click_without_payload.front() = 0x44;
+    Reader play_click_without_payload_reader(play_click_without_payload);
+    const auto play_empty_click =
+        mc::protocol::play::decode_custom_click_action(play_click_without_payload_reader);
+    assert(play_empty_click.id == "mcsquared:action");
+    assert(!play_empty_click.payload);
+
     Bytes click_tag;
     mc::protocol::nbt::write_any_tag(
         click_tag,
