@@ -1,0 +1,3 @@
+add_library(mc_public_headers INTERFACE)
+target_include_directories(mc_public_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mc_public_headers INTERFACE mc_project_options)

@@ -1,0 +1,2 @@
+add_library(mc_tale_of_kingdoms INTERFACE)
+target_link_libraries(mc_tale_of_kingdoms INTERFACE mc_gameplay mc_structure)

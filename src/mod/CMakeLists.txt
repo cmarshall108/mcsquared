@@ -1,0 +1,1 @@
+add_subdirectory(tale_of_kingdoms)

@@ -1,0 +1,3 @@
+add_library(mc_player player.cpp)
+target_link_libraries(mc_player PUBLIC mc_entity mc_inventory mc_public_headers)
+target_link_libraries(mc_player PRIVATE mc_project_options)

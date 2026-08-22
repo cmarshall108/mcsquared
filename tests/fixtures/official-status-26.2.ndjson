@@ -1,0 +1,6 @@
+{"format":"mc-session-v1","server":"official-minecraft-26.2","server_jar_sha256":"183c0499c5f855570ee487dd38e141a53f0121f83a0b07a3bac2d8b6698823e8"}
+{"data":"10008806096c6f63616c686f737463e8010100","direction":"serverbound","offset":0,"sequence":0}
+{"data":"6a00687b226465736372697074696f6e223a224f6666696369616c2032362e32222c22706c6179657273223a7b226d6178223a32302c226f6e6c696e65223a307d2c2276657273696f6e223a7b226e616d65223a2232362e32222c2270726f746f636f6c223a3737367d7d","direction":"clientbound","offset":0,"sequence":1}
+{"data":"0901ffff8fb779f22087","direction":"serverbound","offset":19,"sequence":2}
+{"data":"0901ffff8fb779f22087","direction":"clientbound","offset":107,"sequence":3}
+{"clientbound_bytes":117,"complete":true,"events":4,"serverbound_bytes":29}

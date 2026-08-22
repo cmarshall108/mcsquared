@@ -1,0 +1,2 @@
+add_library(mc_network INTERFACE)
+target_link_libraries(mc_network INTERFACE mc_core)

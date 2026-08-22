@@ -1,69 +1,62 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build directories
-build/
-Build/
-build-*/
-
-# CMake generated files
-CMakeFiles/
+# Build directories and CMake output
+/build/
+/Build/
+/build-*/
+/out/
+/CMakeFiles/
+/Testing/
 CMakeCache.txt
 cmake_install.cmake
+CTestTestfile.cmake
 Makefile
 install_manifest.txt
 compile_commands.json
 
-# Temporary files
-*.tmp
-*.log
-*.bak
-*.swp
+# Compiled output
+*.d
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.pdb
+*.ilk
+*.dSYM/
 
-# vcpkg
-vcpkg_installed/
+# Dependencies and package managers
+/vcpkg_installed/
+/.cache/
 
-# debug information files
-*.dwo
-
-# test output & cache
+# Test, coverage, sanitizer, and profiling output
+*.gcda
+*.gcno
+*.gcov
+*.profraw
+*.profdata
+coverage/
 Testing/
-.cache/
+
+# Runtime data and logs
+/world/
+*.log
+*.tmp
+*.bak
+*.pid
+/core
+/core.*
+
+# Editors and operating systems
+/.vscode/
+/.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.jar

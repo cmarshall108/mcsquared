@@ -1,0 +1,2 @@
+add_library(mc_dimension INTERFACE)
+target_link_libraries(mc_dimension INTERFACE mc_world)

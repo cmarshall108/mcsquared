@@ -1,0 +1,2 @@
+add_library(mc_gameplay INTERFACE)
+target_link_libraries(mc_gameplay INTERFACE mc_player)

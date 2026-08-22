@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            triplet: x64-linux
+            vcpkg: vcpkg
+            sanitizers: OFF
+          - os: ubuntu-latest
+            triplet: x64-linux
+            vcpkg: vcpkg
+            sanitizers: ON
+          - os: macos-latest
+            triplet: arm64-osx
+            vcpkg: vcpkg
+            sanitizers: OFF
+          - os: windows-latest
+            triplet: x64-windows
+            vcpkg: vcpkg.exe
+            sanitizers: OFF
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install locked dependencies
+        shell: bash
+        run: '"$VCPKG_INSTALLATION_ROOT/${{ matrix.vcpkg }}" install --triplet "${{ matrix.triplet }}"'
+
+      - name: Configure
+        shell: bash
+        run: >-
+          cmake -S . -B build/ci -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DBUILD_TESTING=ON
+          -DMC_ENABLE_SANITIZERS=${{ matrix.sanitizers }}
+          -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+
+      - name: Build
+        run: cmake --build build/ci --parallel
+
+      - name: Test
+        run: ctest --test-dir build/ci --output-on-failure
