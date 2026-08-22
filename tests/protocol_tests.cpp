@@ -971,6 +971,22 @@ void test_play_streaming_packets() {
     assert(decoded_block_entity_query.transaction_id == 7);
     assert(decoded_block_entity_query.position == mc::protocol::BlockPosition(1, 64, -2));
 
+    Bytes entity_query{0x19, 0x08, 0x0C};
+    Reader entity_query_reader(entity_query);
+    const auto decoded_entity_query =
+        mc::protocol::play::decode_entity_tag_query(entity_query_reader);
+    assert(decoded_entity_query.transaction_id == 8);
+    assert(decoded_entity_query.entity_id == 12);
+    try {
+        Bytes invalid_entity_query{0x19, 0x08};
+        mc::protocol::write_varint(invalid_entity_query, -1);
+        Reader invalid_entity_query_reader(invalid_entity_query);
+        static_cast<void>(
+            mc::protocol::play::decode_entity_tag_query(invalid_entity_query_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

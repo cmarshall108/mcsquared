@@ -971,6 +971,37 @@ def main() -> None:
                     0x4D, 0x53, 0x63, 0x65, 0x71,
                 ), hex(query_id)
 
+            connection.sendall(
+                compressed_frame(
+                    0x19, threshold, encode_varint(44) + encode_varint(2)
+                )
+            )
+            while True:
+                query_response = read_compressed_packet(connection, threshold)
+                query_id, offset = read_varint(query_response, 0)
+                if query_id == 0x7B:
+                    transaction_id, offset = read_varint(query_response, offset)
+                    assert (transaction_id, query_response[offset], offset + 1) == (
+                        44, 0, len(query_response)
+                    )
+                    break
+                if query_id == 0x2C:
+                    keep_alive_id = struct.unpack(
+                        ">q", query_response[offset:offset + 8]
+                    )[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                    continue
+                if query_id == 0x01:
+                    entity_id, _ = read_varint(query_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                    continue
+                assert query_id in (
+                    0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                    0x4D, 0x53, 0x63, 0x65, 0x71,
+                ), hex(query_id)
+
             break_start_sequence = 6
             break_sequence = 7
             break_position = (8, spawn_y - 1, 8)

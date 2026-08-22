@@ -265,6 +265,7 @@ enum class ServerboundPacketId : std::int32_t {
 	cookie_response = 0x15,
 	keep_alive = 0x1C,
 	interact = 0x1A,
+	entity_tag_query = 0x19,
 	move_player_pos = 0x1E,
 	move_player_pos_rot = 0x1F,
 	move_player_rot = 0x20,
@@ -433,6 +434,11 @@ struct CommandSuggestionRequest final {
 struct BlockEntityTagQuery final {
 	std::int32_t transaction_id;
 	BlockPosition position;
+};
+
+struct EntityTagQuery final {
+	std::int32_t transaction_id;
+	std::int32_t entity_id;
 };
 
 enum class ContainerInput : std::uint8_t {
@@ -667,6 +673,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] std::int64_t decode_keep_alive(Reader& packet);
 [[nodiscard]] std::int32_t decode_attack(Reader& packet);
 [[nodiscard]] BlockEntityTagQuery decode_block_entity_tag_query(Reader& packet);
+[[nodiscard]] EntityTagQuery decode_entity_tag_query(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
 [[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);

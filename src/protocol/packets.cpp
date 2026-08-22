@@ -1997,6 +1997,19 @@ BlockEntityTagQuery decode_block_entity_tag_query(Reader& packet) {
     return query;
 }
 
+EntityTagQuery decode_entity_tag_query(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::entity_tag_query)) {
+        throw DecodeError("expected entity tag query packet");
+    }
+    EntityTagQuery query{packet.read_varint(), packet.read_varint()};
+    if (query.transaction_id < 0 || query.entity_id < 0) {
+        throw DecodeError("entity tag query fields are invalid");
+    }
+    expect_packet_end(packet);
+    return query;
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");
