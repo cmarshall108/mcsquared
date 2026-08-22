@@ -2010,6 +2010,20 @@ EntityTagQuery decode_entity_tag_query(Reader& packet) {
     return query;
 }
 
+BundleItemSelection decode_bundle_item_selection(Reader& packet) {
+    if (packet.read_varint() !=
+        static_cast<std::int32_t>(ServerboundPacketId::bundle_item_selected)) {
+        throw DecodeError("expected bundle item selection packet");
+    }
+    BundleItemSelection selection{packet.read_varint(), packet.read_varint()};
+    if (selection.slot < 0 || selection.slot > 45 ||
+        selection.selected_index < -1 || selection.selected_index > 63) {
+        throw DecodeError("bundle item selection is out of bounds");
+    }
+    expect_packet_end(packet);
+    return selection;
+}
+
 std::string decode_chat_command(Reader& packet) {
     if (packet.read_varint() != static_cast<std::int32_t>(ServerboundPacketId::chat_command)) {
         throw DecodeError("expected chat command packet");

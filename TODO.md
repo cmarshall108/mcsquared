@@ -66,6 +66,7 @@ Checked items are implemented and tested. Registry-driven tasks are complete onl
 - [x] Implement Play entity metadata for bool, VarInt, float, and string serializers used by the entity model
 - [x] Implement Play byte, VarLong, rotations, block-position, block-state, optional-unsigned-int, and pose metadata serializers
 - [x] Implement component-free ItemStack entity metadata serializer for dropped items
+- [x] Decode bounded bundle selection and reject unsupported component mutations with inventory resynchronization
 - [x] Implement Play recipe-book removal/settings and place/settings/seen interaction packets
 - [x] Implement Play level-particle framing with bounded registry-dispatched option payloads
 - [x] Implement Play empty advancement synchronization and open/close tab actions

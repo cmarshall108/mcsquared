@@ -1002,6 +1002,37 @@ def main() -> None:
                     0x4D, 0x53, 0x63, 0x65, 0x71,
                 ), hex(query_id)
 
+            connection.sendall(
+                compressed_frame(
+                    0x03, threshold, encode_varint(36) + encode_varint(2)
+                )
+            )
+            while True:
+                bundle_response = read_compressed_packet(connection, threshold)
+                bundle_id, offset = read_varint(bundle_response, 0)
+                if bundle_id == 0x12:
+                    container_id, offset = read_varint(bundle_response, offset)
+                    state_id, offset = read_varint(bundle_response, offset)
+                    slot_count, offset = read_varint(bundle_response, offset)
+                    assert (container_id, state_id, slot_count) == (0, 0, 46)
+                    break
+                if bundle_id == 0x2C:
+                    keep_alive_id = struct.unpack(
+                        ">q", bundle_response[offset:offset + 8]
+                    )[0]
+                    connection.sendall(
+                        compressed_frame(0x1C, threshold, struct.pack(">q", keep_alive_id))
+                    )
+                    continue
+                if bundle_id == 0x01:
+                    entity_id, _ = read_varint(bundle_response, offset)
+                    spawned_entity_ids.add(entity_id)
+                    continue
+                assert bundle_id in (
+                    0x08, 0x23, 0x2A, 0x30, 0x35, 0x36, 0x38,
+                    0x4D, 0x53, 0x63, 0x65, 0x71,
+                ), hex(bundle_id)
+
             break_start_sequence = 6
             break_sequence = 7
             break_position = (8, spawn_y - 1, 8)

@@ -987,6 +987,21 @@ void test_play_streaming_packets() {
     } catch (const mc::protocol::DecodeError&) {
     }
 
+    Bytes bundle_selection{0x03, 0x24, 0x02};
+    Reader bundle_selection_reader(bundle_selection);
+    const auto decoded_bundle_selection =
+        mc::protocol::play::decode_bundle_item_selection(bundle_selection_reader);
+    assert(decoded_bundle_selection.slot == 36);
+    assert(decoded_bundle_selection.selected_index == 2);
+    try {
+        Bytes invalid_bundle_selection{0x03, 0x24, 0x40};
+        Reader invalid_bundle_selection_reader(invalid_bundle_selection);
+        static_cast<void>(mc::protocol::play::decode_bundle_item_selection(
+            invalid_bundle_selection_reader));
+        assert(false);
+    } catch (const mc::protocol::DecodeError&) {
+    }
+
     const auto framed_null_tag = mc::protocol::play::encode_tag_query(7);
     const auto null_tag_body = packet_body(framed_null_tag);
     Reader null_tag(null_tag_body);

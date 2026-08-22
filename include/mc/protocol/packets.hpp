@@ -252,6 +252,7 @@ enum class ServerboundPacketId : std::int32_t {
 	accept_teleportation = 0x00,
 	attack = 0x01,
 	block_entity_tag_query = 0x02,
+	bundle_item_selected = 0x03,
 	chat_command = 0x07,
 	chunk_batch_received = 0x0B,
 	client_command = 0x0C,
@@ -439,6 +440,11 @@ struct BlockEntityTagQuery final {
 struct EntityTagQuery final {
 	std::int32_t transaction_id;
 	std::int32_t entity_id;
+};
+
+struct BundleItemSelection final {
+	std::int32_t slot;
+	std::int32_t selected_index;
 };
 
 enum class ContainerInput : std::uint8_t {
@@ -674,6 +680,7 @@ struct PickItemFromEntity final {
 [[nodiscard]] std::int32_t decode_attack(Reader& packet);
 [[nodiscard]] BlockEntityTagQuery decode_block_entity_tag_query(Reader& packet);
 [[nodiscard]] EntityTagQuery decode_entity_tag_query(Reader& packet);
+[[nodiscard]] BundleItemSelection decode_bundle_item_selection(Reader& packet);
 [[nodiscard]] std::string decode_chat_command(Reader& packet);
 [[nodiscard]] CommandSuggestionRequest decode_command_suggestion(Reader& packet);
 [[nodiscard]] EntityInteraction decode_interact(Reader& packet);

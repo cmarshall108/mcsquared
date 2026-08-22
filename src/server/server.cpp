@@ -3150,6 +3150,12 @@ private:
                 static_cast<void>(protocol::play::decode_container_click(click_reader));
                 sync_player_inventory();
             } else if (packet_id == static_cast<std::int32_t>(
+                           protocol::play::ServerboundPacketId::bundle_item_selected)) {
+                protocol::Reader selection_reader(packet);
+                static_cast<void>(
+                    protocol::play::decode_bundle_item_selection(selection_reader));
+                sync_player_inventory();
+            } else if (packet_id == static_cast<std::int32_t>(
                            protocol::play::ServerboundPacketId::container_close)) {
                 protocol::Reader close_reader(packet);
                 static_cast<void>(protocol::play::decode_container_close(close_reader));
